@@ -252,7 +252,7 @@ export default function GuestList() {
 
       <div className="grid grid-cols-5 gap-4 mb-6">
         {[
-          { label: 'Confirmed', count: confirmed, color: 'text-green-400' },
+          { label: 'Confirmed', count: confirmed, color: 'text-[#7a9e7e]' },
           { label: 'Pending', count: pending, color: 'text-yellow-400' },
           { label: 'Maybe', count: maybe, color: 'text-orange-500' },
           { label: 'Declined', count: declined, color: 'text-red-600' },
