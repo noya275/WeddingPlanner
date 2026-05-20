@@ -12,14 +12,21 @@ const STATUS_COLORS: Record<RSVPStatus, string> = {
   maybe: 'bg-orange-100 text-orange-600',
 }
 
-type GuestPatch = { id: number; name?: string; email?: string | null; phone?: string | null; plus_one?: boolean; rsvp_status?: RSVPStatus; rsvp_sent?: boolean }
+const PHONE_PREFIX = '+972'
+
+function withPrefix(phone: string) {
+  const digits = phone.replace(/\D/g, '')
+  if (phone.startsWith('+')) return phone
+  return `${PHONE_PREFIX}${digits}`
+}
+
+type GuestPatch = { id: number; name?: string; phone?: string | null; plus_one?: boolean; rsvp_status?: RSVPStatus; rsvp_sent?: boolean }
 
 export default function GuestList() {
   const { eventId } = useParams<{ eventId: string }>()
   const queryClient = useQueryClient()
   const [showForm, setShowForm] = useState(false)
   const [name, setName] = useState('')
-  const [email, setEmail] = useState('')
   const [phone, setPhone] = useState('')
   const [plusOne, setPlusOne] = useState(false)
 
@@ -35,7 +42,6 @@ export default function GuestList() {
       queryClient.invalidateQueries({ queryKey: ['guests', eventId] })
       setShowForm(false)
       setName('')
-      setEmail('')
       setPhone('')
       setPlusOne(false)
     },
@@ -84,7 +90,6 @@ export default function GuestList() {
     document.body.appendChild(a)
     a.click()
     document.body.removeChild(a)
-    // Mark as sent
     updateGuest.mutate({ id: guest.id, rsvp_sent: true })
   }
 
@@ -139,25 +144,29 @@ export default function GuestList() {
         <form
           onSubmit={(e) => {
             e.preventDefault()
-            createGuest.mutate({ name, email: email || null, phone: phone || null, plus_one: plusOne })
+            createGuest.mutate({ name, phone: phone ? withPrefix(phone) : null, plus_one: plusOne })
           }}
           className="bg-white border border-gray-200 rounded-xl p-5 mb-4 space-y-4"
         >
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Name <span className="text-burgundy-600">*</span></label>
               <input value={name} onChange={(e) => setName(e.target.value)} required
                 className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-burgundy-500" />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
-              <input type="email" value={email} onChange={(e) => setEmail(e.target.value)}
-                className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-burgundy-500" />
-            </div>
-            <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Phone</label>
-              <input value={phone} onChange={(e) => setPhone(e.target.value)}
-                className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-burgundy-500" />
+              <div className="flex">
+                <span className="inline-flex items-center px-3 rounded-l-lg border border-r-0 border-gray-300 bg-gray-50 text-gray-500 text-sm">
+                  +972
+                </span>
+                <input
+                  value={phone}
+                  onChange={(e) => setPhone(e.target.value)}
+                  placeholder="501234567"
+                  className="flex-1 border border-gray-300 rounded-r-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-burgundy-500"
+                />
+              </div>
             </div>
           </div>
           <label className="flex items-center gap-2 text-sm text-gray-700">
@@ -189,7 +198,6 @@ export default function GuestList() {
             <thead className="bg-gray-50 text-gray-500 text-xs uppercase tracking-wide">
               <tr>
                 <th className="px-4 py-3 text-left">Name</th>
-                <th className="px-4 py-3 text-left">Email</th>
                 <th className="px-4 py-3 text-left">Phone</th>
                 <th className="px-4 py-3 text-left">RSVP</th>
                 <th className="px-4 py-3 text-center">+1</th>
@@ -207,21 +215,12 @@ export default function GuestList() {
                       onSave={(v) => v && updateGuest.mutate({ id: guest.id, name: v })}
                     />
                   </td>
-                  <td className="px-4 py-2 min-w-[160px]">
-                    <EditableCell
-                      value={guest.email}
-                      type="email"
-                      placeholder="add email"
-                      emptyDisplay="—"
-                      onSave={(v) => updateGuest.mutate({ id: guest.id, email: v })}
-                    />
-                  </td>
                   <td className="px-4 py-2 min-w-[140px]">
                     <EditableCell
                       value={guest.phone}
                       placeholder="add phone"
                       emptyDisplay="—"
-                      onSave={(v) => updateGuest.mutate({ id: guest.id, phone: v })}
+                      onSave={(v) => updateGuest.mutate({ id: guest.id, phone: v ? withPrefix(v) : null })}
                     />
                   </td>
                   <td className="px-4 py-2">
