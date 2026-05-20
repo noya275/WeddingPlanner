@@ -8,9 +8,10 @@ export default defineConfig({
     strictPort: true,
     allowedHosts: true,
     proxy: {
-      '/auth': 'http://localhost:8000',
-      '/events': 'http://localhost:8000',
-      '/public': 'http://localhost:8000',
+      '/api': {
+        target: 'http://localhost:8000',
+        rewrite: (path) => path.replace(/^\/api/, ''),
+      },
     },
   },
 })

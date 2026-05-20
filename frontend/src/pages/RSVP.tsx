@@ -3,7 +3,7 @@ import { useParams } from 'react-router-dom'
 import { useQuery, useMutation } from '@tanstack/react-query'
 import axios from 'axios'
 
-const publicApi = axios.create({ baseURL: import.meta.env.VITE_API_URL ?? '' })
+const publicApi = axios.create({ baseURL: import.meta.env.VITE_API_URL ?? '/api' })
 
 interface RSVPInfo {
   name: string
