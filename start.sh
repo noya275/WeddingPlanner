@@ -29,24 +29,30 @@ echo "✓ Tunnel starting..."
 # Wait for tunnel URL
 echo ""
 echo "Getting your public link..."
-for i in {1..15}; do
-  URL=$(grep -o "https://.*trycloudflare.com" /tmp/wb_tunnel.log 2>/dev/null | head -1)
+URL=""
+for i in {1..20}; do
+  URL=$(grep -o "https://[a-z0-9-]*\.trycloudflare\.com" /tmp/wb_tunnel.log 2>/dev/null | head -1)
   if [ -n "$URL" ]; then
     break
   fi
   sleep 2
 done
 
+# Copy URL to clipboard
+echo "$URL" | pbcopy
+
 echo ""
-echo "=================================="
-echo "  Wedding Planner is running!"
-echo "=================================="
-echo ""
-echo "  Your link (share this):"
-echo "  $URL"
-echo ""
-echo "  Local: http://localhost:5173"
-echo "=================================="
+echo "╔══════════════════════════════════════════╗"
+echo "║       Wedding Planner is running! 💍      ║"
+echo "╠══════════════════════════════════════════╣"
+echo "║                                          ║"
+echo "║  Share this link with Omer:              ║"
+echo "║  $URL"
+echo "║                                          ║"
+echo "║  (Link copied to clipboard!)             ║"
+echo "║                                          ║"
+echo "║  Local: http://localhost:5173            ║"
+echo "╚══════════════════════════════════════════╝"
 echo ""
 
 # Open the app locally

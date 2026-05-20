@@ -6,7 +6,7 @@ export default defineConfig({
   server: {
     port: 5173,
     strictPort: true,
-    allowedHosts: 'all',
+    allowedHosts: true,
     proxy: {
       '/auth': 'http://localhost:8000',
       '/events': 'http://localhost:8000',
