@@ -1,0 +1,91 @@
+from fastapi import APIRouter, Depends, HTTPException
+from sqlalchemy.orm import Session
+from typing import List
+from ..database import get_db
+from ..models.event import Event
+from ..models.task import Task
+from ..models.user import User
+from ..schemas.task import TaskCreate, TaskUpdate, TaskOut
+from .auth import get_current_user
+
+router = APIRouter(tags=["tasks"])
+
+
+def get_event_or_404(event_id: int, user_id: int, db: Session) -> Event:
+    event = db.query(Event).filter(Event.id == event_id, Event.user_id == user_id).first()
+    if not event:
+        raise HTTPException(status_code=404, detail="Event not found")
+    return event
+
+
+def get_task_or_404(task_id: int, event_id: int, db: Session) -> Task:
+    task = db.query(Task).filter(Task.id == task_id, Task.event_id == event_id).first()
+    if not task:
+        raise HTTPException(status_code=404, detail="Task not found")
+    return task
+
+
+@router.get("/events/{event_id}/tasks", response_model=List[TaskOut])
+def list_tasks(
+    event_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    get_event_or_404(event_id, current_user.id, db)
+    return db.query(Task).filter(Task.event_id == event_id).all()
+
+
+@router.post("/events/{event_id}/tasks", response_model=TaskOut, status_code=201)
+def create_task(
+    event_id: int,
+    data: TaskCreate,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    get_event_or_404(event_id, current_user.id, db)
+    task = Task(**data.model_dump(), event_id=event_id)
+    db.add(task)
+    db.commit()
+    db.refresh(task)
+    return task
+
+
+@router.get("/events/{event_id}/tasks/{task_id}", response_model=TaskOut)
+def get_task(
+    event_id: int,
+    task_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    get_event_or_404(event_id, current_user.id, db)
+    return get_task_or_404(task_id, event_id, db)
+
+
+@router.patch("/events/{event_id}/tasks/{task_id}", response_model=TaskOut)
+def update_task(
+    event_id: int,
+    task_id: int,
+    data: TaskUpdate,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    get_event_or_404(event_id, current_user.id, db)
+    task = get_task_or_404(task_id, event_id, db)
+    for field, value in data.model_dump(exclude_unset=True).items():
+        setattr(task, field, value)
+    db.commit()
+    db.refresh(task)
+    return task
+
+
+@router.delete("/events/{event_id}/tasks/{task_id}", status_code=204)
+def delete_task(
+    event_id: int,
+    task_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    get_event_or_404(event_id, current_user.id, db)
+    task = get_task_or_404(task_id, event_id, db)
+    db.delete(task)
+    db.commit()
