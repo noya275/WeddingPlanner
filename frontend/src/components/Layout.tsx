@@ -23,7 +23,7 @@ export default function Layout() {
             </Link>
             <button
               onClick={logout}
-              className="text-sm text-amber-200/70 hover:text-amber-100 transition-colors"
+              className="text-sm transition-colors" style={{ color: 'rgba(255,235,210,0.9)' }}
             >
               Logout
             </button>

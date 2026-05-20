@@ -34,11 +34,11 @@
     background-color: rgba(240, 232, 220, 0.35) !important;
   }
 
-  /* Lighten dark text so it reads well on transparent cards */
-  .text-gray-900 { color: #fff !important; }
-  .text-gray-800 { color: #f5ede6 !important; }
-  .text-gray-700 { color: #edddd4 !important; }
-  .text-gray-600 { color: #e0cfc4 !important; }
-  .text-gray-500 { color: #d4c0b4 !important; }
-  .text-gray-400 { color: #c8b4a8 !important; }
+  /* Dark warm text readable on semi-transparent cards */
+  .text-gray-900 { color: #2c1810 !important; }
+  .text-gray-800 { color: #3d2215 !important; }
+  .text-gray-700 { color: #4a2e1e !important; }
+  .text-gray-600 { color: #5c3c28 !important; }
+  .text-gray-500 { color: #6b4a35 !important; }
+  .text-gray-400 { color: #7a5842 !important; }
 }
