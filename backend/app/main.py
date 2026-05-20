@@ -1,9 +1,22 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from .database import Base, engine
-from .routers import auth, events, guests, tasks, vendors, budget
+from .routers import auth, events, guests, tasks, vendors, budget, public
+from sqlalchemy import text
 
 Base.metadata.create_all(bind=engine)
+
+# Migrations for columns added after initial schema
+with engine.connect() as _conn:
+    for _stmt in [
+        "ALTER TABLE events ADD COLUMN budget_total NUMERIC(12,2)",
+        "ALTER TABLE guests ADD COLUMN rsvp_token VARCHAR",
+    ]:
+        try:
+            _conn.execute(text(_stmt))
+            _conn.commit()
+        except Exception:
+            pass
 
 app = FastAPI(title="Wedding Planner API", version="1.0.0")
 
@@ -21,3 +34,4 @@ app.include_router(guests.router)
 app.include_router(tasks.router)
 app.include_router(vendors.router)
 app.include_router(budget.router)
+app.include_router(public.router)

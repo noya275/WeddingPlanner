@@ -28,5 +28,15 @@ class GuestUpdate(BaseModel):
 class GuestOut(GuestCreate):
     id: int
     event_id: int
+    rsvp_token: Optional[str] = None
+
+    model_config = {"from_attributes": True}
+
+
+class PublicGuestOut(BaseModel):
+    name: str
+    rsvp_status: str
+    event_title: str
+    event_date: Optional[str] = None
 
     model_config = {"from_attributes": True}

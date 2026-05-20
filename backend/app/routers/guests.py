@@ -1,3 +1,4 @@
+import secrets
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from typing import List
@@ -43,7 +44,7 @@ def create_guest(
     current_user: User = Depends(get_current_user),
 ):
     get_event_or_404(event_id, current_user.id, db)
-    guest = Guest(**data.model_dump(), event_id=event_id)
+    guest = Guest(**data.model_dump(), event_id=event_id, rsvp_token=secrets.token_urlsafe(16))
     db.add(guest)
     db.commit()
     db.refresh(guest)
@@ -75,6 +76,22 @@ def update_guest(
         setattr(guest, field, value)
     db.commit()
     db.refresh(guest)
+    return guest
+
+
+@router.post("/events/{event_id}/guests/{guest_id}/rsvp-token", response_model=GuestOut)
+def ensure_rsvp_token(
+    event_id: int,
+    guest_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    get_event_or_404(event_id, current_user.id, db)
+    guest = get_guest_or_404(guest_id, event_id, db)
+    if not guest.rsvp_token:
+        guest.rsvp_token = secrets.token_urlsafe(16)
+        db.commit()
+        db.refresh(guest)
     return guest
 
 

@@ -1,7 +1,12 @@
 import enum
+import secrets
 from sqlalchemy import Column, Integer, String, ForeignKey, Enum, Boolean
 from sqlalchemy.orm import relationship
 from ..database import Base
+
+
+def _gen_token() -> str:
+    return secrets.token_urlsafe(16)
 
 
 class RSVPStatus(str, enum.Enum):
@@ -23,5 +28,6 @@ class Guest(Base):
     plus_one = Column(Boolean, default=False)
     table_number = Column(Integer)
     notes = Column(String)
+    rsvp_token = Column(String, unique=True, index=True)
 
     event = relationship("Event", back_populates="guests")

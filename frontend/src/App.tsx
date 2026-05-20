@@ -7,6 +7,7 @@ import GuestList from './pages/GuestList'
 import Tasks from './pages/Tasks'
 import Vendors from './pages/Vendors'
 import Budget from './pages/Budget'
+import RSVPPage from './pages/RSVP'
 import Layout from './components/Layout'
 
 const queryClient = new QueryClient()
@@ -23,6 +24,7 @@ export default function App() {
         <Routes>
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
+          <Route path="/rsvp/:token" element={<RSVPPage />} />
           <Route
             path="/"
             element={
