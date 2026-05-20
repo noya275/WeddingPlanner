@@ -69,7 +69,11 @@ export default function Login() {
             />
             Remember me for a year
           </label>
-          {error && <p className="text-red-500 text-sm">{error}</p>}
+          {error && (
+            <div className="bg-red-50 border border-red-200 rounded-lg px-4 py-3 text-red-600 text-sm">
+              {error}
+            </div>
+          )}
           <button
             type="submit"
             disabled={loading}
