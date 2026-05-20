@@ -36,10 +36,10 @@ export default function Login() {
   return (
     <div
       className="min-h-screen flex items-center justify-center"
-      style={{ backgroundImage: 'url(/WedBG.png)', backgroundSize: 'cover', backgroundPosition: 'center' }}
+      style={{ backgroundImage: 'url(/WedBG.png)', backgroundSize: 'cover', backgroundPosition: 'center 40%' }}
     >
       <div className="absolute inset-0 bg-black/30" />
-      <div className="relative w-full max-w-sm mx-4">
+      <div className="relative w-full max-w-xs mx-4">
         <div className="text-center mb-6">
           <h1 className="text-5xl text-white drop-shadow-lg" style={{ fontFamily: 'Georgia, "Times New Roman", serif', letterSpacing: '0.05em' }}>
             Wedding Planner
@@ -47,7 +47,7 @@ export default function Login() {
           <p className="text-white/80 text-sm mt-2 tracking-widest uppercase">Plan your perfect day</p>
         </div>
 
-        <div className="bg-white/20 backdrop-blur-md rounded-xl shadow-lg border border-white/30 p-6">
+        <div className="bg-white/20 backdrop-blur-md rounded-xl shadow-lg border border-white/30 p-5">
         <h1 className="text-xl font-bold text-white mb-1">Welcome back</h1>
         <p className="text-white/70 text-sm mb-5">Sign in to your account</p>
 
