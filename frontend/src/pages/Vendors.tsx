@@ -25,6 +25,7 @@ export default function Vendors() {
   const { data: vendors = [], isLoading } = useQuery<Vendor[]>({
     queryKey: ['vendors', eventId],
     queryFn: () => api.get(`/events/${eventId}/vendors`).then((r) => r.data),
+    refetchInterval: 5000,
   })
 
   const createVendor = useMutation({

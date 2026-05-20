@@ -33,6 +33,7 @@ export default function GuestList() {
   const { data: guests = [], isLoading } = useQuery<Guest[]>({
     queryKey: ['guests', eventId],
     queryFn: () => api.get(`/events/${eventId}/guests`).then((r) => r.data),
+    refetchInterval: 5000,
   })
 
   const createGuest = useMutation({

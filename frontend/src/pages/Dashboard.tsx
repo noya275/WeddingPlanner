@@ -19,6 +19,7 @@ export default function Dashboard() {
   const { data: events = [], isLoading } = useQuery<Event[]>({
     queryKey: ['events'],
     queryFn: () => api.get('/events/').then((r) => r.data),
+    refetchInterval: 5000,
   })
 
   const createEvent = useMutation({

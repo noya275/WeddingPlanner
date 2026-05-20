@@ -22,11 +22,13 @@ export default function Budget() {
   const { data: event } = useQuery<Event>({
     queryKey: ['event', eventId],
     queryFn: () => api.get(`/events/${eventId}`).then((r) => r.data),
+    refetchInterval: 5000,
   })
 
   const { data: items = [], isLoading } = useQuery<BudgetItem[]>({
     queryKey: ['budget', eventId],
     queryFn: () => api.get(`/events/${eventId}/budget`).then((r) => r.data),
+    refetchInterval: 5000,
   })
 
   const updateEventBudget = useMutation({

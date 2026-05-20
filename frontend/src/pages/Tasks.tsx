@@ -25,6 +25,7 @@ export default function Tasks() {
   const { data: tasks = [], isLoading } = useQuery<Task[]>({
     queryKey: ['tasks', eventId],
     queryFn: () => api.get(`/events/${eventId}/tasks`).then((r) => r.data),
+    refetchInterval: 5000,
   })
 
   const createTask = useMutation({
