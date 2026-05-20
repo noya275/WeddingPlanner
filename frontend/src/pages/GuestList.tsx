@@ -279,7 +279,7 @@ export default function GuestList() {
               {...tableProps}
             />
             <SideTable
-              title="Groom's Side" emoji="👱🏻‍♂️"
+              title="Groom's Side" emoji="🤵🏻‍♂️"
               guests={groomGuests}
               onAdd={(name, phone) => createGuest.mutate({ name, phone: phone ? withPrefix(phone) : null, side: 'groom' })}
               {...tableProps}
