@@ -33,7 +33,7 @@ def list_guests(
     current_user: User = Depends(get_current_user),
 ):
     get_event_or_404(event_id, current_user.id, db)
-    return db.query(Guest).filter(Guest.event_id == event_id).all()
+    return db.query(Guest).filter(Guest.event_id == event_id).order_by(Guest.id).all()
 
 
 @router.post("/events/{event_id}/guests", response_model=GuestOut, status_code=201)
