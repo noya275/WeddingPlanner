@@ -6,6 +6,7 @@ import Dashboard from './pages/Dashboard'
 import GuestList from './pages/GuestList'
 import Tasks from './pages/Tasks'
 import Vendors from './pages/Vendors'
+import Budget from './pages/Budget'
 import Layout from './components/Layout'
 
 const queryClient = new QueryClient()
@@ -34,6 +35,7 @@ export default function App() {
             <Route path="events/:eventId/guests" element={<GuestList />} />
             <Route path="events/:eventId/tasks" element={<Tasks />} />
             <Route path="events/:eventId/vendors" element={<Vendors />} />
+            <Route path="events/:eventId/budget" element={<Budget />} />
           </Route>
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>

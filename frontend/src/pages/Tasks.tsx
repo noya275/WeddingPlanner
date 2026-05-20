@@ -4,11 +4,13 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import api from '../api/client'
 import type { Task, TaskStatus } from '../api/types'
 
-const COLUMNS: { status: TaskStatus; label: string; color: string }[] = [
-  { status: 'todo', label: 'To Do', color: 'bg-gray-100 text-gray-600' },
-  { status: 'in_progress', label: 'In Progress', color: 'bg-blue-100 text-blue-600' },
-  { status: 'done', label: 'Done', color: 'bg-green-100 text-green-600' },
+const COLUMNS: { status: TaskStatus; label: string; dot: string }[] = [
+  { status: 'todo', label: 'To Do', dot: 'bg-gray-400' },
+  { status: 'in_progress', label: 'In Progress', dot: 'bg-blue-400' },
+  { status: 'done', label: 'Done', dot: 'bg-green-400' },
 ]
+
+const STATUS_ORDER: TaskStatus[] = ['todo', 'in_progress', 'done']
 
 export default function Tasks() {
   const { eventId } = useParams<{ eventId: string }>()
@@ -48,6 +50,12 @@ export default function Tasks() {
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['tasks', eventId] }),
   })
 
+  function moveTask(task: Task, direction: -1 | 1) {
+    const idx = STATUS_ORDER.indexOf(task.status)
+    const next = STATUS_ORDER[idx + direction]
+    if (next) updateStatus.mutate({ id: task.id, status: next })
+  }
+
   return (
     <div>
       <div className="flex items-center gap-3 mb-6">
@@ -60,7 +68,7 @@ export default function Tasks() {
       <div className="flex justify-end mb-4">
         <button
           onClick={() => setShowForm(!showForm)}
-          className="bg-rose-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-rose-700"
+          className="bg-burgundy-700 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-burgundy-800"
         >
           + Add Task
         </button>
@@ -82,14 +90,14 @@ export default function Tasks() {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Task <span className="text-rose-500">*</span>
+                Task <span className="text-burgundy-600">*</span>
               </label>
               <input
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
                 required
                 placeholder="e.g. Book photographer"
-                className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-rose-500"
+                className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-burgundy-500"
               />
             </div>
             <div>
@@ -98,7 +106,7 @@ export default function Tasks() {
                 value={assignedTo}
                 onChange={(e) => setAssignedTo(e.target.value)}
                 placeholder="e.g. Sarah"
-                className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-rose-500"
+                className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-burgundy-500"
               />
             </div>
             <div>
@@ -107,7 +115,7 @@ export default function Tasks() {
                 type="date"
                 value={dueDate}
                 onChange={(e) => setDueDate(e.target.value)}
-                className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-rose-500"
+                className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-burgundy-500"
               />
             </div>
             <div>
@@ -116,7 +124,7 @@ export default function Tasks() {
                 value={category}
                 onChange={(e) => setCategory(e.target.value)}
                 placeholder="e.g. Photography"
-                className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-rose-500"
+                className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-burgundy-500"
               />
             </div>
           </div>
@@ -124,7 +132,7 @@ export default function Tasks() {
             <button
               type="submit"
               disabled={createTask.isPending}
-              className="bg-rose-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-rose-700 disabled:opacity-50"
+              className="bg-burgundy-700 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-burgundy-800 disabled:opacity-50"
             >
               Add Task
             </button>
@@ -143,15 +151,14 @@ export default function Tasks() {
         <p className="text-gray-500">Loading...</p>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          {COLUMNS.map(({ status, label, color }) => {
+          {COLUMNS.map(({ status, label, dot }, colIdx) => {
             const columnTasks = tasks.filter((t) => t.status === status)
             return (
               <div key={status} className="bg-white border border-gray-200 rounded-xl p-4">
                 <div className="flex items-center gap-2 mb-4">
-                  <span className={`text-xs font-semibold px-2 py-1 rounded-full ${color}`}>
-                    {label}
-                  </span>
-                  <span className="text-xs text-gray-400">{columnTasks.length}</span>
+                  <span className={`w-2 h-2 rounded-full ${dot}`} />
+                  <span className="text-sm font-semibold text-gray-700">{label}</span>
+                  <span className="text-xs text-gray-400 ml-auto">{columnTasks.length}</span>
                 </div>
                 <div className="space-y-2">
                   {columnTasks.map((task) => (
@@ -160,10 +167,10 @@ export default function Tasks() {
                       className="border border-gray-100 rounded-lg p-3 hover:border-gray-200 transition-colors"
                     >
                       <div className="flex justify-between items-start">
-                        <p className="text-sm font-medium text-gray-900">{task.title}</p>
+                        <p className="text-sm font-medium text-gray-900 flex-1 mr-1">{task.title}</p>
                         <button
                           onClick={() => deleteTask.mutate(task.id)}
-                          className="text-gray-200 hover:text-red-500 text-base ml-1"
+                          className="text-gray-200 hover:text-red-500 text-base shrink-0"
                         >
                           ×
                         </button>
@@ -176,18 +183,28 @@ export default function Tasks() {
                           Due {new Date(task.due_date).toLocaleDateString()}
                         </p>
                       )}
-                      <div className="mt-2">
-                        <select
-                          value={task.status}
-                          onChange={(e) =>
-                            updateStatus.mutate({ id: task.id, status: e.target.value as TaskStatus })
-                          }
-                          className="text-xs text-gray-500 border border-gray-200 rounded px-2 py-1 w-full"
-                        >
-                          <option value="todo">To Do</option>
-                          <option value="in_progress">In Progress</option>
-                          <option value="done">Done</option>
-                        </select>
+                      {task.category && (
+                        <p className="text-xs text-gray-300 mt-0.5">{task.category}</p>
+                      )}
+                      <div className="flex gap-1 mt-2">
+                        {colIdx > 0 && (
+                          <button
+                            onClick={() => moveTask(task, -1)}
+                            className="text-xs text-gray-400 hover:text-burgundy-700 px-1.5 py-0.5 rounded border border-gray-200 hover:border-burgundy-300 transition-colors"
+                            title="Move left"
+                          >
+                            ←
+                          </button>
+                        )}
+                        {colIdx < COLUMNS.length - 1 && (
+                          <button
+                            onClick={() => moveTask(task, 1)}
+                            className="text-xs text-gray-400 hover:text-burgundy-700 px-1.5 py-0.5 rounded border border-gray-200 hover:border-burgundy-300 transition-colors"
+                            title="Move right"
+                          >
+                            →
+                          </button>
+                        )}
                       </div>
                     </div>
                   ))}

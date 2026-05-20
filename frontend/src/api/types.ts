@@ -15,6 +15,7 @@ export interface Event {
   date: string | null
   venue: string | null
   description: string | null
+  budget_total: number | null
   created_at: string
 }
 
@@ -53,4 +54,14 @@ export interface Vendor {
   price: number | null
   status: VendorStatus
   notes: string | null
+}
+
+export interface BudgetItem {
+  id: number
+  event_id: number
+  name: string
+  category: string | null
+  estimated: number | null
+  actual: number | null
+  is_paid: boolean
 }

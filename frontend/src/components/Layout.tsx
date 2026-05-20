@@ -13,7 +13,7 @@ export default function Layout() {
       <nav className="bg-white shadow-sm border-b border-gray-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
-            <Link to="/" className="text-xl font-semibold text-rose-600 tracking-tight">
+            <Link to="/" className="text-xl font-semibold text-burgundy-700 tracking-tight">
               Wedding Planner
             </Link>
             <button

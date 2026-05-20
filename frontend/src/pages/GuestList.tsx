@@ -19,6 +19,11 @@ export default function GuestList() {
   const [phone, setPhone] = useState('')
   const [plusOne, setPlusOne] = useState(false)
 
+  const [editingId, setEditingId] = useState<number | null>(null)
+  const [editName, setEditName] = useState('')
+  const [editEmail, setEditEmail] = useState('')
+  const [editPhone, setEditPhone] = useState('')
+
   const { data: guests = [], isLoading } = useQuery<Guest[]>({
     queryKey: ['guests', eventId],
     queryFn: () => api.get(`/events/${eventId}/guests`).then((r) => r.data),
@@ -37,6 +42,15 @@ export default function GuestList() {
     },
   })
 
+  const updateGuest = useMutation({
+    mutationFn: ({ id, ...payload }: { id: number; name: string; email: string | null; phone: string | null }) =>
+      api.patch(`/events/${eventId}/guests/${id}`, payload),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['guests', eventId] })
+      setEditingId(null)
+    },
+  })
+
   const updateRSVP = useMutation({
     mutationFn: ({ id, status }: { id: number; status: RSVPStatus }) =>
       api.patch(`/events/${eventId}/guests/${id}`, { rsvp_status: status }),
@@ -47,6 +61,17 @@ export default function GuestList() {
     mutationFn: (id: number) => api.delete(`/events/${eventId}/guests/${id}`),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['guests', eventId] }),
   })
+
+  function startEdit(guest: Guest) {
+    setEditingId(guest.id)
+    setEditName(guest.name)
+    setEditEmail(guest.email ?? '')
+    setEditPhone(guest.phone ?? '')
+  }
+
+  function saveEdit(id: number) {
+    updateGuest.mutate({ id, name: editName, email: editEmail || null, phone: editPhone || null })
+  }
 
   const confirmed = guests.filter((g) => g.rsvp_status === 'confirmed').length
   const declined = guests.filter((g) => g.rsvp_status === 'declined').length
@@ -78,7 +103,7 @@ export default function GuestList() {
         <p className="text-sm text-gray-500">{guests.length} guests total</p>
         <button
           onClick={() => setShowForm(!showForm)}
-          className="bg-rose-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-rose-700"
+          className="bg-burgundy-700 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-burgundy-800"
         >
           + Add Guest
         </button>
@@ -95,13 +120,13 @@ export default function GuestList() {
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Name <span className="text-rose-500">*</span>
+                Name <span className="text-burgundy-600">*</span>
               </label>
               <input
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 required
-                className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-rose-500"
+                className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-burgundy-500"
               />
             </div>
             <div>
@@ -110,7 +135,7 @@ export default function GuestList() {
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-rose-500"
+                className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-burgundy-500"
               />
             </div>
             <div>
@@ -118,7 +143,7 @@ export default function GuestList() {
               <input
                 value={phone}
                 onChange={(e) => setPhone(e.target.value)}
-                className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-rose-500"
+                className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-burgundy-500"
               />
             </div>
           </div>
@@ -135,7 +160,7 @@ export default function GuestList() {
             <button
               type="submit"
               disabled={createGuest.isPending}
-              className="bg-rose-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-rose-700 disabled:opacity-50"
+              className="bg-burgundy-700 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-burgundy-800 disabled:opacity-50"
             >
               Add
             </button>
@@ -169,36 +194,93 @@ export default function GuestList() {
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100">
-              {guests.map((guest) => (
-                <tr key={guest.id} className="hover:bg-gray-50">
-                  <td className="px-4 py-3 font-medium text-gray-900">{guest.name}</td>
-                  <td className="px-4 py-3 text-gray-500">
-                    {guest.email || guest.phone || '—'}
-                  </td>
-                  <td className="px-4 py-3">
-                    <select
-                      value={guest.rsvp_status}
-                      onChange={(e) =>
-                        updateRSVP.mutate({ id: guest.id, status: e.target.value as RSVPStatus })
-                      }
-                      className={`text-xs font-medium px-2 py-1 rounded-full border-0 cursor-pointer ${STATUS_COLORS[guest.rsvp_status]}`}
-                    >
-                      <option value="pending">Pending</option>
-                      <option value="confirmed">Confirmed</option>
-                      <option value="declined">Declined</option>
-                    </select>
-                  </td>
-                  <td className="px-4 py-3 text-gray-500">{guest.plus_one ? 'Yes' : 'No'}</td>
-                  <td className="px-4 py-3 text-right">
-                    <button
-                      onClick={() => deleteGuest.mutate(guest.id)}
-                      className="text-gray-300 hover:text-red-500 text-lg"
-                    >
-                      ×
-                    </button>
-                  </td>
-                </tr>
-              ))}
+              {guests.map((guest) =>
+                editingId === guest.id ? (
+                  <tr key={guest.id} className="bg-burgundy-50">
+                    <td className="px-4 py-2">
+                      <input
+                        value={editName}
+                        onChange={(e) => setEditName(e.target.value)}
+                        required
+                        className="w-full border border-gray-300 rounded px-2 py-1 text-sm focus:outline-none focus:ring-1 focus:ring-burgundy-500"
+                      />
+                    </td>
+                    <td className="px-4 py-2">
+                      <div className="flex flex-col gap-1">
+                        <input
+                          value={editEmail}
+                          onChange={(e) => setEditEmail(e.target.value)}
+                          placeholder="Email"
+                          className="w-full border border-gray-300 rounded px-2 py-1 text-sm focus:outline-none focus:ring-1 focus:ring-burgundy-500"
+                        />
+                        <input
+                          value={editPhone}
+                          onChange={(e) => setEditPhone(e.target.value)}
+                          placeholder="Phone"
+                          className="w-full border border-gray-300 rounded px-2 py-1 text-sm focus:outline-none focus:ring-1 focus:ring-burgundy-500"
+                        />
+                      </div>
+                    </td>
+                    <td className="px-4 py-2 text-gray-400 text-xs">—</td>
+                    <td className="px-4 py-2 text-gray-500">{guest.plus_one ? 'Yes' : 'No'}</td>
+                    <td className="px-4 py-2 text-right">
+                      <div className="flex gap-1 justify-end">
+                        <button
+                          onClick={() => saveEdit(guest.id)}
+                          disabled={updateGuest.isPending}
+                          className="text-xs bg-burgundy-700 text-white px-2 py-1 rounded hover:bg-burgundy-800 disabled:opacity-50"
+                        >
+                          Save
+                        </button>
+                        <button
+                          onClick={() => setEditingId(null)}
+                          className="text-xs text-gray-500 px-2 py-1 rounded hover:bg-gray-100"
+                        >
+                          Cancel
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ) : (
+                  <tr key={guest.id} className="hover:bg-gray-50">
+                    <td className="px-4 py-3 font-medium text-gray-900">{guest.name}</td>
+                    <td className="px-4 py-3 text-gray-500">
+                      {guest.email || guest.phone || '—'}
+                    </td>
+                    <td className="px-4 py-3">
+                      <select
+                        value={guest.rsvp_status}
+                        onChange={(e) =>
+                          updateRSVP.mutate({ id: guest.id, status: e.target.value as RSVPStatus })
+                        }
+                        className={`text-xs font-medium px-2 py-1 rounded-full border-0 cursor-pointer ${STATUS_COLORS[guest.rsvp_status]}`}
+                      >
+                        <option value="pending">Pending</option>
+                        <option value="confirmed">Confirmed</option>
+                        <option value="declined">Declined</option>
+                      </select>
+                    </td>
+                    <td className="px-4 py-3 text-gray-500">{guest.plus_one ? 'Yes' : 'No'}</td>
+                    <td className="px-4 py-3 text-right">
+                      <div className="flex gap-1 justify-end">
+                        <button
+                          onClick={() => startEdit(guest)}
+                          className="text-gray-300 hover:text-burgundy-600 text-sm px-1"
+                          title="Edit guest"
+                        >
+                          ✎
+                        </button>
+                        <button
+                          onClick={() => deleteGuest.mutate(guest.id)}
+                          className="text-gray-300 hover:text-red-500 text-lg"
+                        >
+                          ×
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                )
+              )}
             </tbody>
           </table>
         </div>

@@ -78,7 +78,7 @@ export default function Vendors() {
       <div className="flex justify-end mb-4">
         <button
           onClick={() => setShowForm(!showForm)}
-          className="bg-rose-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-rose-700"
+          className="bg-burgundy-700 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-burgundy-800"
         >
           + Add Vendor
         </button>
@@ -102,14 +102,14 @@ export default function Vendors() {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Vendor Name <span className="text-rose-500">*</span>
+                Vendor Name <span className="text-burgundy-600">*</span>
               </label>
               <input
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 required
                 placeholder="e.g. ABC Photography"
-                className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-rose-500"
+                className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-burgundy-500"
               />
             </div>
             <div>
@@ -118,7 +118,7 @@ export default function Vendors() {
                 value={category}
                 onChange={(e) => setCategory(e.target.value)}
                 placeholder="e.g. Photography, Catering"
-                className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-rose-500"
+                className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-burgundy-500"
               />
             </div>
             <div>
@@ -130,7 +130,7 @@ export default function Vendors() {
                 placeholder="0.00"
                 min="0"
                 step="0.01"
-                className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-rose-500"
+                className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-burgundy-500"
               />
             </div>
             <div>
@@ -138,7 +138,7 @@ export default function Vendors() {
               <input
                 value={contactName}
                 onChange={(e) => setContactName(e.target.value)}
-                className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-rose-500"
+                className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-burgundy-500"
               />
             </div>
             <div>
@@ -147,7 +147,7 @@ export default function Vendors() {
                 type="email"
                 value={contactEmail}
                 onChange={(e) => setContactEmail(e.target.value)}
-                className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-rose-500"
+                className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-burgundy-500"
               />
             </div>
             <div>
@@ -155,7 +155,7 @@ export default function Vendors() {
               <input
                 value={contactPhone}
                 onChange={(e) => setContactPhone(e.target.value)}
-                className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-rose-500"
+                className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-burgundy-500"
               />
             </div>
           </div>
@@ -163,7 +163,7 @@ export default function Vendors() {
             <button
               type="submit"
               disabled={createVendor.isPending}
-              className="bg-rose-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-rose-700 disabled:opacity-50"
+              className="bg-burgundy-700 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-burgundy-800 disabled:opacity-50"
             >
               Add Vendor
             </button>
