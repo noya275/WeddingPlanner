@@ -6,6 +6,8 @@ export default defineConfig({
   plugins: [react(), basicSsl()],
   server: {
     https: true,
+    port: 5173,
+    strictPort: true,
     proxy: {
       '/auth': 'http://localhost:8000',
       '/events': 'http://localhost:8000',
