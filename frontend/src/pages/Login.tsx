@@ -79,7 +79,7 @@ export default function Login() {
               onChange={(e) => setRememberMe(e.target.checked)}
               className="rounded accent-burgundy-700"
             />
-            Remember me for a year
+            Remember me
           </label>
           {error && (
             <div className="bg-red-50 border border-red-200 rounded-lg px-4 py-3 text-red-600 text-sm">
