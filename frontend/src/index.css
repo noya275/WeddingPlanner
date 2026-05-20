@@ -13,25 +13,24 @@
 
 @layer base {
   body {
-    background-color: #c9b8a8;
+    background-color: #8b2030;
   }
 
-  /* Warm white for all cards/surfaces */
+  /* Semi-transparent cards */
   .bg-white {
-    background-color: #fffdf9 !important;
+    background-color: rgba(255, 252, 248, 0.75) !important;
+    backdrop-filter: blur(8px);
   }
 
-  /* Warm border tones */
   .border-gray-200 {
-    border-color: #e8ddd4 !important;
+    border-color: rgba(200, 180, 160, 0.5) !important;
   }
 
   .divide-gray-100 > * + * {
-    border-color: #f0e8e0 !important;
+    border-color: rgba(200, 180, 160, 0.35) !important;
   }
 
-  /* Warm table header */
   .bg-gray-50 {
-    background-color: #d4c4b4 !important;
+    background-color: rgba(240, 232, 220, 0.6) !important;
   }
 }
