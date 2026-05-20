@@ -39,7 +39,7 @@ export default function Login() {
       style={{ backgroundImage: 'url(/WedBG.png)', backgroundSize: 'cover', backgroundPosition: 'center' }}
     >
       <div className="absolute inset-0 bg-black/30" />
-      <div className="relative max-w-md w-full bg-white/90 backdrop-blur-sm rounded-xl shadow-lg border border-gray-200 p-8">
+      <div className="relative max-w-md w-full bg-white/90 backdrop-blur-sm rounded-xl shadow-lg border border-gray-200 p-8 mx-4">
         <h1 className="text-2xl font-bold text-gray-900 mb-2">Welcome back</h1>
         <p className="text-gray-500 text-sm mb-6">Sign in to your account</p>
 
@@ -93,7 +93,6 @@ export default function Login() {
             Register
           </Link>
         </p>
-        </div>
       </div>
     </div>
   )
