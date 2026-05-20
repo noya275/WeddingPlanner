@@ -76,7 +76,7 @@ export default function Budget() {
   const remaining = budgetTotal != null ? budgetTotal - totalActual : null
   const spentPct = budgetTotal ? Math.min(100, Math.round((totalActual / budgetTotal) * 100)) : null
 
-  const fmt = (n: number) => `$${Math.round(n).toLocaleString()}`
+  const fmt = (n: number) => `₪${Math.round(n).toLocaleString()}`
 
   return (
     <div>
