@@ -39,7 +39,15 @@ export default function Login() {
       style={{ backgroundImage: 'url(/WedBG.png)', backgroundSize: 'cover', backgroundPosition: 'center' }}
     >
       <div className="absolute inset-0 bg-black/30" />
-      <div className="relative max-w-md w-full bg-white/90 backdrop-blur-sm rounded-xl shadow-lg border border-gray-200 p-8 mx-4">
+      <div className="relative max-w-md w-full mx-4">
+        <div className="text-center mb-6">
+          <h1 className="text-5xl text-white drop-shadow-lg" style={{ fontFamily: 'Georgia, "Times New Roman", serif', letterSpacing: '0.05em' }}>
+            Wedding Planner
+          </h1>
+          <p className="text-white/80 text-sm mt-2 tracking-widest uppercase">Plan your perfect day</p>
+        </div>
+
+        <div className="bg-white/90 backdrop-blur-sm rounded-xl shadow-lg border border-gray-200 p-8">
         <h1 className="text-2xl font-bold text-gray-900 mb-2">Welcome back</h1>
         <p className="text-gray-500 text-sm mb-6">Sign in to your account</p>
 
@@ -93,6 +101,7 @@ export default function Login() {
             Register
           </Link>
         </p>
+        </div>
       </div>
     </div>
   )
