@@ -151,7 +151,7 @@ function SideTable({ title, emoji, guests, onUpdate, onDelete, onSendRSVP, onAdd
                 )}
               </td>
               <td className="px-3 py-2 text-right">
-                <button onClick={() => onDelete(guest.id)} className="hover:text-red-500 text-lg transition-colors" style={{ color: '#7a5842' }}>×</button>
+                <button onClick={() => onDelete(guest.id)} className="hover:text-red-500 text-lg transition-colors" style={{ color: '#b89880' }}>×</button>
               </td>
             </tr>
           ))}
