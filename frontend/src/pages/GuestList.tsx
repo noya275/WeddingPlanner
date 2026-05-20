@@ -9,6 +9,7 @@ const STATUS_COLORS: Record<RSVPStatus, string> = {
   pending: 'bg-yellow-100 text-yellow-700',
   confirmed: 'bg-green-100 text-green-700',
   declined: 'bg-red-100 text-red-700',
+  maybe: 'bg-orange-100 text-orange-600',
 }
 
 type GuestPatch = { id: number; name?: string; email?: string | null; phone?: string | null; plus_one?: boolean; rsvp_status?: RSVPStatus; rsvp_sent?: boolean }
@@ -59,7 +60,7 @@ export default function GuestList() {
     if (!guest.rsvp_token || !guest.phone) return null
     const rsvpUrl = `${window.location.origin}/rsvp/${guest.rsvp_token}`
     const msg = `Hi ${guest.name}! You're invited to our wedding 💍\nPlease let us know if you'll be joining us:\n${rsvpUrl}`
-    return `https://wa.me/${guest.phone.replace(/\D/g, '')}?text=${encodeURIComponent(msg)}`
+    return `whatsapp://send?phone=${guest.phone.replace(/\D/g, '')}&text=${encodeURIComponent(msg)}`
   }
 
   const ensureToken = useMutation({
@@ -99,6 +100,7 @@ export default function GuestList() {
   const confirmed = guests.filter((g) => g.rsvp_status === 'confirmed').length
   const declined = guests.filter((g) => g.rsvp_status === 'declined').length
   const pending = guests.filter((g) => g.rsvp_status === 'pending').length
+  const maybe = guests.filter((g) => g.rsvp_status === 'maybe').length
   const sent = guests.filter((g) => g.rsvp_sent).length
 
   return (
@@ -108,10 +110,11 @@ export default function GuestList() {
         <h1 className="text-2xl font-bold text-gray-900">Guest List</h1>
       </div>
 
-      <div className="grid grid-cols-4 gap-4 mb-6">
+      <div className="grid grid-cols-5 gap-4 mb-6">
         {[
           { label: 'Confirmed', count: confirmed, color: 'text-green-600' },
           { label: 'Pending', count: pending, color: 'text-yellow-600' },
+          { label: 'Maybe', count: maybe, color: 'text-orange-500' },
           { label: 'Declined', count: declined, color: 'text-red-600' },
           { label: 'Invite Sent', count: sent, color: 'text-blue-600' },
         ].map(({ label, count, color }) => (
@@ -229,6 +232,7 @@ export default function GuestList() {
                     >
                       <option value="pending">Pending</option>
                       <option value="confirmed">Confirmed</option>
+                      <option value="maybe">Maybe</option>
                       <option value="declined">Declined</option>
                     </select>
                   </td>

@@ -25,8 +25,8 @@ def submit_rsvp(token: str, body: dict, db: Session = Depends(get_db)):
     if not guest:
         raise HTTPException(status_code=404, detail="Invalid RSVP link")
     status = body.get("status")
-    if status not in ("confirmed", "declined"):
-        raise HTTPException(status_code=400, detail="Status must be confirmed or declined")
+    if status not in ("confirmed", "declined", "maybe"):
+        raise HTTPException(status_code=400, detail="Status must be confirmed, declined, or maybe")
     guest.rsvp_status = RSVPStatus(status)
     db.commit()
     return {"ok": True, "status": status}

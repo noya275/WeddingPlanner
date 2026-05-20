@@ -13,6 +13,7 @@ class RSVPStatus(str, enum.Enum):
     pending = "pending"
     confirmed = "confirmed"
     declined = "declined"
+    maybe = "maybe"
 
 
 class Guest(Base):

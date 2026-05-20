@@ -1,4 +1,4 @@
-export type RSVPStatus = 'pending' | 'confirmed' | 'declined'
+export type RSVPStatus = 'pending' | 'confirmed' | 'declined' | 'maybe'
 export type TaskStatus = 'todo' | 'in_progress' | 'done'
 export type VendorStatus = 'prospect' | 'contacted' | 'booked' | 'cancelled'
 

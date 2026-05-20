@@ -15,7 +15,7 @@ interface RSVPInfo {
 export default function RSVPPage() {
   const { token } = useParams<{ token: string }>()
   const [submitted, setSubmitted] = useState(false)
-  const [choice, setChoice] = useState<'confirmed' | 'declined' | null>(null)
+  const [choice, setChoice] = useState<'confirmed' | 'declined' | 'maybe' | null>(null)
 
   const { data, isLoading, isError } = useQuery<RSVPInfo>({
     queryKey: ['rsvp', token],
@@ -23,7 +23,7 @@ export default function RSVPPage() {
   })
 
   const submit = useMutation({
-    mutationFn: (status: 'confirmed' | 'declined') =>
+    mutationFn: (status: 'confirmed' | 'declined' | 'maybe') =>
       publicApi.post(`/public/rsvp/${token}`, { status }),
     onSuccess: (_, status) => {
       setChoice(status)
@@ -51,18 +51,17 @@ export default function RSVPPage() {
   }
 
   if (submitted) {
+    const thankYou = {
+      confirmed: { emoji: '🎉', title: "We'll see you there!", body: `Thanks ${data.name}! Your attendance at ${data.event_title} has been confirmed.` },
+      declined:  { emoji: '💌', title: 'We understand, thanks!', body: `Thanks for letting us know, ${data.name}. You'll be missed!` },
+      maybe:     { emoji: '🤔', title: "No worries, we'll keep you posted!", body: `Thanks ${data.name}! We hope you'll be able to make it to ${data.event_title}.` },
+    }[choice!]
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
         <div className="max-w-sm w-full mx-4 text-center">
-          <div className="text-5xl mb-4">{choice === 'confirmed' ? '🎉' : '💌'}</div>
-          <h1 className="text-2xl font-bold text-gray-900 mb-2">
-            {choice === 'confirmed' ? "We'll see you there!" : 'We understand, thanks!'}
-          </h1>
-          <p className="text-gray-500">
-            {choice === 'confirmed'
-              ? `Thanks ${data.name}! Your attendance at ${data.event_title} has been confirmed.`
-              : `Thanks for letting us know, ${data.name}. You'll be missed!`}
-          </p>
+          <div className="text-5xl mb-4">{thankYou.emoji}</div>
+          <h1 className="text-2xl font-bold text-gray-900 mb-2">{thankYou.title}</h1>
+          <p className="text-gray-500">{thankYou.body}</p>
         </div>
       </div>
     )
@@ -98,6 +97,13 @@ export default function RSVPPage() {
                 className="w-full bg-burgundy-700 text-white py-3 rounded-xl font-semibold text-sm hover:bg-burgundy-800 transition-colors disabled:opacity-50"
               >
                 ✓ Yes, I'll be there!
+              </button>
+              <button
+                onClick={() => submit.mutate('maybe')}
+                disabled={submit.isPending}
+                className="w-full bg-orange-50 text-orange-600 border border-orange-200 py-3 rounded-xl font-semibold text-sm hover:bg-orange-100 transition-colors disabled:opacity-50"
+              >
+                🤔 Not sure yet
               </button>
               <button
                 onClick={() => submit.mutate('declined')}
