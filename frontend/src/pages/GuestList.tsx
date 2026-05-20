@@ -45,7 +45,7 @@ function AddRow({ onAdd }: { onAdd: (name: string, phone: string) => void }) {
             if (e.key === 'Tab') phoneRef.current?.focus()
           }}
           placeholder="+ Add guest..."
-          className="w-full text-sm outline-none bg-transparent placeholder-gray-300 text-gray-700"
+          className="w-full text-sm outline-none bg-transparent placeholder-gray-400 text-gray-700"
         />
       </td>
       <td className="px-3 py-2">
@@ -56,7 +56,7 @@ function AddRow({ onAdd }: { onAdd: (name: string, phone: string) => void }) {
           onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); submit() } }}
           onBlur={() => { if (name.trim()) submit() }}
           placeholder="phone"
-          className="w-full text-sm outline-none bg-transparent placeholder-gray-300 text-gray-600"
+          className="w-full text-sm outline-none bg-transparent placeholder-gray-400 text-gray-700"
         />
       </td>
       <td colSpan={4} />
@@ -151,7 +151,7 @@ function SideTable({ title, emoji, guests, onUpdate, onDelete, onSendRSVP, onAdd
                 )}
               </td>
               <td className="px-3 py-2 text-right">
-                <button onClick={() => onDelete(guest.id)} className="text-gray-300 hover:text-red-500 text-lg transition-colors">×</button>
+                <button onClick={() => onDelete(guest.id)} className="text-gray-400 hover:text-red-500 text-lg transition-colors">×</button>
               </td>
             </tr>
           ))}
