@@ -12,6 +12,7 @@ class GuestCreate(BaseModel):
     plus_one: bool = False
     table_number: Optional[int] = None
     notes: Optional[str] = None
+    side: Optional[str] = None
 
 
 class GuestUpdate(BaseModel):
@@ -24,6 +25,7 @@ class GuestUpdate(BaseModel):
     table_number: Optional[int] = None
     notes: Optional[str] = None
     rsvp_sent: Optional[bool] = None
+    side: Optional[str] = None
 
 
 class GuestOut(GuestCreate):

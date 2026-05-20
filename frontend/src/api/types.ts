@@ -32,6 +32,7 @@ export interface Guest {
   notes: string | null
   rsvp_token: string | null
   rsvp_sent: boolean
+  side: 'bride' | 'groom' | null
 }
 
 export interface Task {

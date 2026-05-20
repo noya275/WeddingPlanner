@@ -8,6 +8,16 @@ Base.metadata.create_all(bind=engine)
 
 # SQLite-only column migrations (skipped on PostgreSQL where create_all handles it)
 from .core.config import settings as _s
+with engine.connect() as _conn:
+    for _stmt in [
+        "ALTER TABLE guests ADD COLUMN side VARCHAR",
+    ]:
+        try:
+            _conn.execute(text(_stmt))
+            _conn.commit()
+        except Exception:
+            pass
+
 if _s.DATABASE_URL.startswith("sqlite"):
     with engine.connect() as _conn:
         for _stmt in [

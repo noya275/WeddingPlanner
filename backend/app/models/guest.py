@@ -31,5 +31,6 @@ class Guest(Base):
     notes = Column(String)
     rsvp_token = Column(String, unique=True, index=True)
     rsvp_sent = Column(Boolean, default=False)
+    side = Column(String)  # 'bride', 'groom', or None
 
     event = relationship("Event", back_populates="guests")
