@@ -165,6 +165,7 @@ function SideTable({ title, emoji, guests, onUpdate, onDelete, onSendRSVP, onAdd
 export default function GuestList() {
   const { eventId } = useParams<{ eventId: string }>()
   const queryClient = useQueryClient()
+  const [search, setSearch] = useState('')
 
   const { data: guests = [], isLoading } = useQuery<Guest[]>({
     queryKey: ['guests', eventId],
@@ -232,8 +233,10 @@ export default function GuestList() {
   const maybe = guests.filter((g) => g.rsvp_status === 'maybe').length
   const sent = guests.filter((g) => g.rsvp_sent).length
 
-  const brideGuests = guests.filter((g) => g.side === 'bride')
-  const groomGuests = guests.filter((g) => g.side === 'groom')
+  const q = search.toLowerCase()
+  const filtered = q ? guests.filter((g) => g.name.toLowerCase().includes(q) || g.phone?.includes(q)) : guests
+  const brideGuests = filtered.filter((g) => g.side === 'bride')
+  const groomGuests = filtered.filter((g) => g.side === 'groom')
 
   const tableProps = {
     onUpdate: (patch: GuestPatch) => updateGuest.mutate(patch),
@@ -265,7 +268,15 @@ export default function GuestList() {
         ))}
       </div>
 
-      <p className="text-sm text-gray-500 mb-4">{guests.length} guests total</p>
+      <div className="flex items-center justify-between mb-4">
+        <p className="text-sm text-gray-500">{guests.length} guests total</p>
+        <input
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          placeholder="Search guests..."
+          className="border border-gray-200 rounded-lg px-3 py-1.5 text-sm bg-white/50 focus:outline-none focus:ring-2 focus:ring-burgundy-400 w-48"
+        />
+      </div>
 
       {isLoading ? (
         <p className="text-gray-500">Loading...</p>
