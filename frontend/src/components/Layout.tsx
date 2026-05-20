@@ -13,7 +13,7 @@ export default function Layout() {
   return (
     <div
       className="min-h-screen animate-fadein"
-      style={{ backgroundImage: 'url(/RedBG.jpg)', backgroundSize: 'cover', backgroundPosition: 'center', backgroundAttachment: 'fixed' }}
+      style={{ backgroundImage: 'url(/RedBG.webp)', backgroundSize: 'cover', backgroundPosition: 'center', backgroundAttachment: 'fixed' }}
     >
       <nav style={{ backgroundColor: 'rgba(80, 30, 40, 0.55)', backdropFilter: 'blur(10px)', borderBottom: '1px solid rgba(180,120,100,0.3)' }}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
