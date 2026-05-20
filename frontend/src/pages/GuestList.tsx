@@ -273,13 +273,13 @@ export default function GuestList() {
         <div className="space-y-6">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <SideTable
-              title="Bride's Side" emoji="👰"
+              title="Bride's Side" emoji="👰🏻‍♀️"
               guests={brideGuests}
               onAdd={(name, phone) => createGuest.mutate({ name, phone: phone ? withPrefix(phone) : null, side: 'bride' })}
               {...tableProps}
             />
             <SideTable
-              title="Groom's Side" emoji="🤵"
+              title="Groom's Side" emoji="👱🏻‍♂️"
               guests={groomGuests}
               onAdd={(name, phone) => createGuest.mutate({ name, phone: phone ? withPrefix(phone) : null, side: 'groom' })}
               {...tableProps}
