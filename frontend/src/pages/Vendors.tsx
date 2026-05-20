@@ -24,13 +24,13 @@ export default function Vendors() {
 
   const { data: vendors = [], isLoading } = useQuery<Vendor[]>({
     queryKey: ['vendors', eventId],
-    queryFn: () => api.get(`/events/${eventId}/vendors`).then((r) => r.data),
+    queryFn: () => api.get(`/events/₪{eventId}/vendors`).then((r) => r.data),
     refetchInterval: 5000,
   })
 
   const createVendor = useMutation({
     mutationFn: (payload: object) =>
-      api.post(`/events/${eventId}/vendors`, payload).then((r) => r.data),
+      api.post(`/events/₪{eventId}/vendors`, payload).then((r) => r.data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['vendors', eventId] })
       setShowForm(false)
@@ -45,12 +45,12 @@ export default function Vendors() {
 
   const updateStatus = useMutation({
     mutationFn: ({ id, status }: { id: number; status: VendorStatus }) =>
-      api.patch(`/events/${eventId}/vendors/${id}`, { status }),
+      api.patch(`/events/₪{eventId}/vendors/₪{id}`, { status }),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['vendors', eventId] }),
   })
 
   const deleteVendor = useMutation({
-    mutationFn: (id: number) => api.delete(`/events/${eventId}/vendors/${id}`),
+    mutationFn: (id: number) => api.delete(`/events/₪{eventId}/vendors/₪{id}`),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['vendors', eventId] }),
   })
 
@@ -71,7 +71,7 @@ export default function Vendors() {
         <div className="bg-white border border-gray-200 rounded-xl p-4 mb-6 inline-block">
           <p className="text-sm text-gray-500">Total booked</p>
           <p className="text-2xl font-bold text-gray-900">
-            ${totalBooked.toLocaleString()}
+            ₪{totalBooked.toLocaleString()}
           </p>
         </div>
       )}
@@ -123,7 +123,7 @@ export default function Vendors() {
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Price ($)</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Price (₪)</label>
               <input
                 type="number"
                 value={price}
@@ -207,7 +207,7 @@ export default function Vendors() {
                     {vendor.contact_email || vendor.contact_phone || '—'}
                   </td>
                   <td className="px-4 py-3 text-gray-700">
-                    {vendor.price != null ? `$${Number(vendor.price).toLocaleString()}` : '—'}
+                    {vendor.price != null ? `₪₪{Number(vendor.price).toLocaleString()}` : '—'}
                   </td>
                   <td className="px-4 py-3">
                     <select
@@ -215,7 +215,7 @@ export default function Vendors() {
                       onChange={(e) =>
                         updateStatus.mutate({ id: vendor.id, status: e.target.value as VendorStatus })
                       }
-                      className={`text-xs font-medium px-2 py-1 rounded-full border-0 cursor-pointer ${STATUS_COLORS[vendor.status]}`}
+                      className={`text-xs font-medium px-2 py-1 rounded-full border-0 cursor-pointer ₪{STATUS_COLORS[vendor.status]}`}
                     >
                       <option value="prospect">Prospect</option>
                       <option value="contacted">Contacted</option>
