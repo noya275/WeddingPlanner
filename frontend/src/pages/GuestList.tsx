@@ -62,6 +62,14 @@ export default function GuestList() {
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['guests', eventId] }),
   })
 
+  function buildWhatsAppUrl(guest: Guest) {
+    if (!guest.rsvp_token || !guest.phone) return null
+    const rsvpUrl = `${window.location.origin}/rsvp/${guest.rsvp_token}`
+    const msg = `Hi ${guest.name}! You're invited to our wedding 💍\nPlease let us know if you'll be joining us:\n${rsvpUrl}`
+    const phone = guest.phone.replace(/\D/g, '')
+    return `https://wa.me/${phone}?text=${encodeURIComponent(msg)}`
+  }
+
   const ensureToken = useMutation({
     mutationFn: (id: number) =>
       api.post(`/events/${eventId}/guests/${id}/rsvp-token`).then((r) => r.data as Guest),
@@ -69,21 +77,31 @@ export default function GuestList() {
       queryClient.setQueryData(['guests', eventId], (old: Guest[] = []) =>
         old.map((g) => (g.id === updated.id ? updated : g))
       )
-      openWhatsApp(updated)
+      const url = buildWhatsAppUrl(updated)
+      if (url) {
+        const a = document.createElement('a')
+        a.href = url
+        a.target = '_blank'
+        a.rel = 'noreferrer'
+        document.body.appendChild(a)
+        a.click()
+        document.body.removeChild(a)
+      }
     },
   })
-
-  function openWhatsApp(guest: Guest) {
-    if (!guest.rsvp_token) return
-    const rsvpUrl = `${window.location.origin}/rsvp/${guest.rsvp_token}`
-    const msg = `Hi ${guest.name}! You're invited to our wedding 💍\nPlease let us know if you'll be joining us:\n${rsvpUrl}`
-    window.open(`https://wa.me/${guest.phone?.replace(/\D/g, '')}?text=${encodeURIComponent(msg)}`, '_blank')
-  }
 
   function handleSendRSVP(guest: Guest) {
     if (!guest.phone) return
     if (guest.rsvp_token) {
-      openWhatsApp(guest)
+      // Open as anchor so the browser doesn't treat it as a blocked popup
+      const url = buildWhatsAppUrl(guest)
+      if (url) {
+        const a = document.createElement('a')
+        a.href = url
+        a.target = '_blank'
+        a.rel = 'noreferrer'
+        a.click()
+      }
     } else {
       ensureToken.mutate(guest.id)
     }
