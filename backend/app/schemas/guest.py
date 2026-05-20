@@ -23,12 +23,14 @@ class GuestUpdate(BaseModel):
     plus_one: Optional[bool] = None
     table_number: Optional[int] = None
     notes: Optional[str] = None
+    rsvp_sent: Optional[bool] = None
 
 
 class GuestOut(GuestCreate):
     id: int
     event_id: int
     rsvp_token: Optional[str] = None
+    rsvp_sent: bool = False
 
     model_config = {"from_attributes": True}
 

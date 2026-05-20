@@ -3,6 +3,7 @@ import { useParams, Link } from 'react-router-dom'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import api from '../api/client'
 import type { Task, TaskStatus } from '../api/types'
+import EditableCell from '../components/EditableCell'
 
 const COLUMNS: { status: TaskStatus; label: string; dot: string }[] = [
   { status: 'todo', label: 'To Do', dot: 'bg-gray-400' },
@@ -43,6 +44,16 @@ export default function Tasks() {
     mutationFn: ({ id, status }: { id: number; status: TaskStatus }) =>
       api.patch(`/events/${eventId}/tasks/${id}`, { status }),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['tasks', eventId] }),
+  })
+
+  const updateTask = useMutation({
+    mutationFn: ({ id, ...data }: { id: number; title?: string; assigned_to?: string | null; due_date?: string | null; category?: string | null }) =>
+      api.patch(`/events/${eventId}/tasks/${id}`, data).then((r) => r.data),
+    onSuccess: (updated: Task) => {
+      queryClient.setQueryData(['tasks', eventId], (old: Task[] = []) =>
+        old.map((t) => (t.id === updated.id ? updated : t))
+      )
+    },
   })
 
   const deleteTask = useMutation({
@@ -164,28 +175,48 @@ export default function Tasks() {
                   {columnTasks.map((task) => (
                     <div
                       key={task.id}
-                      className="border border-gray-100 rounded-lg p-3 hover:border-gray-200 transition-colors"
+                      className="border border-gray-100 rounded-lg p-3 hover:border-gray-200 transition-colors group"
                     >
-                      <div className="flex justify-between items-start">
-                        <p className="text-sm font-medium text-gray-900 flex-1 mr-1">{task.title}</p>
+                      <div className="flex justify-between items-start mb-1">
+                        <div className="flex-1 mr-1">
+                          <EditableCell
+                            value={task.title}
+                            bold
+                            onSave={(v) => v && updateTask.mutate({ id: task.id, title: v })}
+                          />
+                        </div>
                         <button
                           onClick={() => deleteTask.mutate(task.id)}
-                          className="text-gray-200 hover:text-red-500 text-base shrink-0"
+                          className="text-gray-200 hover:text-red-500 text-base shrink-0 opacity-0 group-hover:opacity-100 transition-opacity"
                         >
                           ×
                         </button>
                       </div>
-                      {task.assigned_to && (
-                        <p className="text-xs text-gray-400 mt-1">{task.assigned_to}</p>
-                      )}
-                      {task.due_date && (
-                        <p className="text-xs text-gray-400">
-                          Due {new Date(task.due_date).toLocaleDateString()}
-                        </p>
-                      )}
-                      {task.category && (
-                        <p className="text-xs text-gray-300 mt-0.5">{task.category}</p>
-                      )}
+                      <div className="text-xs">
+                        <EditableCell
+                          value={task.assigned_to}
+                          placeholder="assign to…"
+                          emptyDisplay=""
+                          onSave={(v) => updateTask.mutate({ id: task.id, assigned_to: v })}
+                        />
+                      </div>
+                      <div className="text-xs">
+                        <EditableCell
+                          value={task.due_date}
+                          type="date"
+                          placeholder="due date"
+                          emptyDisplay=""
+                          onSave={(v) => updateTask.mutate({ id: task.id, due_date: v })}
+                        />
+                      </div>
+                      <div className="text-xs">
+                        <EditableCell
+                          value={task.category}
+                          placeholder="category"
+                          emptyDisplay=""
+                          onSave={(v) => updateTask.mutate({ id: task.id, category: v })}
+                        />
+                      </div>
                       <div className="flex gap-1 mt-2">
                         {colIdx > 0 && (
                           <button

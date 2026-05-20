@@ -11,6 +11,7 @@ with engine.connect() as _conn:
     for _stmt in [
         "ALTER TABLE events ADD COLUMN budget_total NUMERIC(12,2)",
         "ALTER TABLE guests ADD COLUMN rsvp_token VARCHAR",
+        "ALTER TABLE guests ADD COLUMN rsvp_sent BOOLEAN DEFAULT 0",
     ]:
         try:
             _conn.execute(text(_stmt))

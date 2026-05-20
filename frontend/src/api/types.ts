@@ -31,6 +31,7 @@ export interface Guest {
   table_number: number | null
   notes: string | null
   rsvp_token: string | null
+  rsvp_sent: boolean
 }
 
 export interface Task {

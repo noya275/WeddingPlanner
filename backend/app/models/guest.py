@@ -29,5 +29,6 @@ class Guest(Base):
     table_number = Column(Integer)
     notes = Column(String)
     rsvp_token = Column(String, unique=True, index=True)
+    rsvp_sent = Column(Boolean, default=False)
 
     event = relationship("Event", back_populates="guests")

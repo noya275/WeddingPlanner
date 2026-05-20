@@ -3,6 +3,7 @@ import { useParams, Link } from 'react-router-dom'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import api from '../api/client'
 import type { BudgetItem, Event } from '../api/types'
+import EditableCell from '../components/EditableCell'
 
 export default function Budget() {
   const { eventId } = useParams<{ eventId: string }>()
@@ -17,13 +18,6 @@ export default function Budget() {
 
   const [editBudget, setEditBudget] = useState(false)
   const [budgetInput, setBudgetInput] = useState('')
-
-  const [editingId, setEditingId] = useState<number | null>(null)
-  const [editName, setEditName] = useState('')
-  const [editCategory, setEditCategory] = useState('')
-  const [editEstimated, setEditEstimated] = useState('')
-  const [editActual, setEditActual] = useState('')
-  const [editPaid, setEditPaid] = useState(false)
 
   const { data: event } = useQuery<Event>({
     queryKey: ['event', eventId],
@@ -65,7 +59,6 @@ export default function Budget() {
       api.patch(`/events/${eventId}/budget/${id}`, payload),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['budget', eventId] })
-      setEditingId(null)
     },
   })
 
@@ -73,15 +66,6 @@ export default function Budget() {
     mutationFn: (id: number) => api.delete(`/events/${eventId}/budget/${id}`),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['budget', eventId] }),
   })
-
-  function startEditItem(item: BudgetItem) {
-    setEditingId(item.id)
-    setEditName(item.name)
-    setEditCategory(item.category ?? '')
-    setEditEstimated(item.estimated != null ? String(item.estimated) : '')
-    setEditActual(item.actual != null ? String(item.actual) : '')
-    setEditPaid(item.is_paid)
-  }
 
   const totalEstimated = items.reduce((s, i) => s + (i.estimated ?? 0), 0)
   const totalActual = items.reduce((s, i) => s + (i.actual ?? 0), 0)
@@ -306,97 +290,46 @@ export default function Budget() {
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100">
-              {items.map((item) =>
-                editingId === item.id ? (
-                  <tr key={item.id} className="bg-burgundy-50">
-                    <td className="px-4 py-2">
-                      <input
-                        value={editName}
-                        onChange={(e) => setEditName(e.target.value)}
-                        required
-                        className="w-full border border-gray-300 rounded px-2 py-1 text-sm focus:outline-none focus:ring-1 focus:ring-burgundy-500"
+              {items.map((item) => (
+                  <tr key={item.id} className={`hover:bg-gray-50 group ${item.is_paid ? 'opacity-60' : ''}`}>
+                    <td className="px-4 py-2 min-w-[160px]">
+                      <div className="flex items-center gap-1">
+                        {item.is_paid && <span className="text-green-500 text-xs shrink-0">✓</span>}
+                        <EditableCell
+                          value={item.name}
+                          bold
+                          onSave={(v) => v && updateItem.mutate({ id: item.id, name: v })}
+                        />
+                      </div>
+                    </td>
+                    <td className="px-4 py-2 min-w-[120px]">
+                      <EditableCell
+                        value={item.category}
+                        placeholder="category"
+                        onSave={(v) => updateItem.mutate({ id: item.id, category: v })}
                       />
                     </td>
-                    <td className="px-4 py-2">
-                      <input
-                        value={editCategory}
-                        onChange={(e) => setEditCategory(e.target.value)}
-                        className="w-full border border-gray-300 rounded px-2 py-1 text-sm focus:outline-none focus:ring-1 focus:ring-burgundy-500"
-                      />
-                    </td>
-                    <td className="px-4 py-2">
-                      <input
+                    <td className="px-4 py-2 text-right min-w-[100px]">
+                      <EditableCell
+                        value={item.estimated != null ? String(Math.round(Number(item.estimated))) : ''}
                         type="number"
-                        value={editEstimated}
-                        onChange={(e) => setEditEstimated(e.target.value)}
-                        min="0"
-                        step="1"
-                        className="w-24 border border-gray-300 rounded px-2 py-1 text-sm focus:outline-none focus:ring-1 focus:ring-burgundy-500 text-right"
+                        placeholder="0"
+                        emptyDisplay="—"
+                        onSave={(v) => updateItem.mutate({ id: item.id, estimated: v ? parseFloat(v) : null })}
                       />
                     </td>
-                    <td className="px-4 py-2">
-                      <input
+                    <td className="px-4 py-2 text-right min-w-[100px]">
+                      <EditableCell
+                        value={item.actual != null ? String(Math.round(Number(item.actual))) : ''}
                         type="number"
-                        value={editActual}
-                        onChange={(e) => setEditActual(e.target.value)}
-                        min="0"
-                        step="1"
-                        className="w-24 border border-gray-300 rounded px-2 py-1 text-sm focus:outline-none focus:ring-1 focus:ring-burgundy-500 text-right"
+                        placeholder="0"
+                        emptyDisplay="—"
+                        onSave={(v) => updateItem.mutate({ id: item.id, actual: v ? parseFloat(v) : null })}
                       />
                     </td>
                     <td className="px-4 py-2 text-center">
-                      <input
-                        type="checkbox"
-                        checked={editPaid}
-                        onChange={(e) => setEditPaid(e.target.checked)}
-                        className="rounded"
-                      />
-                    </td>
-                    <td className="px-4 py-2 text-right">
-                      <div className="flex gap-1 justify-end">
-                        <button
-                          onClick={() =>
-                            updateItem.mutate({
-                              id: item.id,
-                              name: editName,
-                              category: editCategory || null,
-                              estimated: editEstimated ? parseFloat(editEstimated) : null,
-                              actual: editActual ? parseFloat(editActual) : null,
-                              is_paid: editPaid,
-                            })
-                          }
-                          disabled={updateItem.isPending}
-                          className="text-xs bg-burgundy-700 text-white px-2 py-1 rounded hover:bg-burgundy-800 disabled:opacity-50"
-                        >
-                          Save
-                        </button>
-                        <button
-                          onClick={() => setEditingId(null)}
-                          className="text-xs text-gray-500 px-2 py-1 rounded hover:bg-gray-100"
-                        >
-                          Cancel
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ) : (
-                  <tr key={item.id} className={`hover:bg-gray-50 ${item.is_paid ? 'opacity-60' : ''}`}>
-                    <td className="px-4 py-3 font-medium text-gray-900">
-                      {item.is_paid && <span className="mr-1 text-green-500 text-xs">✓</span>}
-                      {item.name}
-                    </td>
-                    <td className="px-4 py-3 text-gray-500">{item.category || '—'}</td>
-                    <td className="px-4 py-3 text-gray-700 text-right">
-                      {item.estimated != null ? fmt(Number(item.estimated)) : '—'}
-                    </td>
-                    <td className="px-4 py-3 text-gray-700 text-right font-medium">
-                      {item.actual != null ? fmt(Number(item.actual)) : '—'}
-                    </td>
-                    <td className="px-4 py-3 text-center">
                       <button
-                        onClick={() =>
-                          updateItem.mutate({ id: item.id, is_paid: !item.is_paid })
-                        }
+                        onClick={() => updateItem.mutate({ id: item.id, is_paid: !item.is_paid })}
                         className={`text-xs px-2 py-0.5 rounded-full font-medium transition-colors ${
                           item.is_paid
                             ? 'bg-green-100 text-green-700 hover:bg-green-200'
@@ -407,25 +340,15 @@ export default function Budget() {
                       </button>
                     </td>
                     <td className="px-4 py-3 text-right">
-                      <div className="flex gap-1 justify-end">
-                        <button
-                          onClick={() => startEditItem(item)}
-                          className="text-gray-300 hover:text-burgundy-600 text-sm px-1"
-                          title="Edit item"
-                        >
-                          ✎
-                        </button>
-                        <button
-                          onClick={() => deleteItem.mutate(item.id)}
-                          className="text-gray-300 hover:text-red-500 text-lg"
-                        >
-                          ×
-                        </button>
-                      </div>
+                      <button
+                        onClick={() => deleteItem.mutate(item.id)}
+                        className="text-gray-300 hover:text-red-500 text-lg opacity-0 group-hover:opacity-100 transition-opacity"
+                      >
+                        ×
+                      </button>
                     </td>
                   </tr>
-                )
-              )}
+              ))}
             </tbody>
             <tfoot className="bg-gray-50 border-t border-gray-200">
               <tr>
