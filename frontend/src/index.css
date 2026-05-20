@@ -11,6 +11,11 @@
   animation: fadein 0.18s ease-out both;
 }
 
+.guest-add-input::placeholder {
+  color: #7a5842;
+  opacity: 1;
+}
+
 @layer base {
   body {
     background-color: #8b2030;
