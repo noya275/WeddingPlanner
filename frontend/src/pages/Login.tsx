@@ -39,7 +39,7 @@ export default function Login() {
       style={{ backgroundImage: 'url(/WedBG.png)', backgroundSize: 'cover', backgroundPosition: 'center' }}
     >
       <div className="absolute inset-0 bg-black/30" />
-      <div className="relative max-w-md w-full mx-4">
+      <div className="relative w-full max-w-sm mx-4">
         <div className="text-center mb-6">
           <h1 className="text-5xl text-white drop-shadow-lg" style={{ fontFamily: 'Georgia, "Times New Roman", serif', letterSpacing: '0.05em' }}>
             Wedding Planner
@@ -47,32 +47,32 @@ export default function Login() {
           <p className="text-white/80 text-sm mt-2 tracking-widest uppercase">Plan your perfect day</p>
         </div>
 
-        <div className="bg-white/90 backdrop-blur-sm rounded-xl shadow-lg border border-gray-200 p-8">
-        <h1 className="text-2xl font-bold text-gray-900 mb-2">Welcome back</h1>
-        <p className="text-gray-500 text-sm mb-6">Sign in to your account</p>
+        <div className="bg-white/20 backdrop-blur-md rounded-xl shadow-lg border border-white/30 p-6">
+        <h1 className="text-xl font-bold text-white mb-1">Welcome back</h1>
+        <p className="text-white/70 text-sm mb-5">Sign in to your account</p>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
+            <label className="block text-sm font-medium text-white/80 mb-1">Email</label>
             <input
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
-              className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-burgundy-500 focus:border-transparent"
+              className="w-full bg-white/20 border border-white/30 rounded-lg px-3 py-2 text-sm text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-white/50"
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Password</label>
+            <label className="block text-sm font-medium text-white/80 mb-1">Password</label>
             <input
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
-              className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-burgundy-500 focus:border-transparent"
+              className="w-full bg-white/20 border border-white/30 rounded-lg px-3 py-2 text-sm text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-white/50"
             />
           </div>
-          <label className="flex items-center gap-2 text-sm text-gray-600 cursor-pointer select-none">
+          <label className="flex items-center gap-2 text-sm text-white/70 cursor-pointer select-none">
             <input
               type="checkbox"
               checked={rememberMe}
@@ -95,9 +95,9 @@ export default function Login() {
           </button>
         </form>
 
-        <p className="mt-4 text-center text-sm text-gray-500">
+        <p className="mt-4 text-center text-sm text-white/60">
           Don&apos;t have an account?{' '}
-          <Link to="/register" className="text-burgundy-700 hover:underline font-medium">
+          <Link to="/register" className="text-white hover:underline font-medium">
             Register
           </Link>
         </p>
