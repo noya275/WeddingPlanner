@@ -234,7 +234,6 @@ export default function GuestList() {
 
   const brideGuests = guests.filter((g) => g.side === 'bride')
   const groomGuests = guests.filter((g) => g.side === 'groom')
-  const unassigned = guests.filter((g) => !g.side)
 
   const tableProps = {
     onUpdate: (patch: GuestPatch) => updateGuest.mutate(patch),
@@ -287,41 +286,6 @@ export default function GuestList() {
             />
           </div>
 
-          {unassigned.length > 0 && (
-            <div className="bg-white border border-gray-200 rounded-xl overflow-hidden">
-              <div className="px-4 py-3 border-b border-gray-200 flex items-center justify-between">
-                <h2 className="font-semibold text-gray-900">Unassigned</h2>
-                <span className="text-xs text-gray-500">Click a name to assign a side</span>
-              </div>
-              <table className="w-full text-sm">
-                <tbody className="divide-y divide-gray-100">
-                  {unassigned.map((guest) => (
-                    <tr key={guest.id} className="hover:bg-gray-50 group">
-                      <td className="px-3 py-2 font-medium text-gray-900 w-40">
-                        <EditableCell value={guest.name} bold onSave={(v) => v && tableProps.onUpdate({ id: guest.id, name: v })} />
-                      </td>
-                      <td className="px-3 py-2 text-gray-500">{guest.phone || '—'}</td>
-                      <td className="px-3 py-2">
-                        <div className="flex gap-2">
-                          <button onClick={() => tableProps.onUpdate({ id: guest.id, side: 'bride' })}
-                            className="text-xs px-2 py-1 rounded-lg bg-pink-50 text-pink-700 hover:bg-pink-100 border border-pink-200">
-                            → Bride
-                          </button>
-                          <button onClick={() => tableProps.onUpdate({ id: guest.id, side: 'groom' })}
-                            className="text-xs px-2 py-1 rounded-lg bg-blue-50 text-blue-700 hover:bg-blue-100 border border-blue-200">
-                            → Groom
-                          </button>
-                        </div>
-                      </td>
-                      <td className="px-3 py-2 text-right">
-                        <button onClick={() => tableProps.onDelete(guest.id)} className="text-gray-200 hover:text-red-500 text-lg opacity-0 group-hover:opacity-100 transition-opacity">×</button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
         </div>
       )}
     </div>
