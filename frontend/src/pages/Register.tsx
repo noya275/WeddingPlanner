@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
+import { motion } from 'framer-motion'
 import api from '../api/client'
 
 export default function Register() {
@@ -38,7 +39,12 @@ export default function Register() {
       style={{ backgroundImage: 'url(/WedBG.png)', backgroundSize: 'cover', backgroundPosition: 'center 40%' }}
     >
       <div className="absolute inset-0 bg-black/30" />
-      <div className="relative w-full max-w-xs mx-4">
+      <motion.div
+        className="relative w-full max-w-xs mx-4"
+        initial={{ opacity: 0, y: 24 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.4, ease: 'easeOut' }}
+      >
         <div className="text-center mb-6">
           <h1 className="text-5xl text-white drop-shadow-lg" style={{ fontFamily: 'Georgia, "Times New Roman", serif', letterSpacing: '0.05em' }}>
             Wedding Planner
@@ -103,7 +109,7 @@ export default function Register() {
             </Link>
           </p>
         </div>
-      </div>
+      </motion.div>
     </div>
   )
 }
