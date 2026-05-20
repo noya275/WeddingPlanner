@@ -1,5 +1,4 @@
 import { Link, Outlet, useNavigate, useLocation } from 'react-router-dom'
-import { AnimatePresence } from 'framer-motion'
 import PageTransition from './PageTransition'
 
 export default function Layout() {
@@ -29,11 +28,9 @@ export default function Layout() {
         </div>
       </nav>
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <AnimatePresence mode="wait">
-          <PageTransition key={location.pathname}>
-            <Outlet />
-          </PageTransition>
-        </AnimatePresence>
+        <PageTransition key={location.pathname}>
+          <Outlet />
+        </PageTransition>
       </main>
     </div>
   )
