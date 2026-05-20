@@ -253,10 +253,10 @@ export default function GuestList() {
       <div className="grid grid-cols-5 gap-4 mb-6">
         {[
           { label: 'Confirmed', count: confirmed, color: 'text-green-600' },
-          { label: 'Pending', count: pending, color: 'text-amber-500' },
+          { label: 'Pending', count: pending, color: 'text-yellow-400' },
           { label: 'Maybe', count: maybe, color: 'text-orange-500' },
           { label: 'Declined', count: declined, color: 'text-red-600' },
-          { label: 'Invite Sent', count: sent, color: 'text-indigo-700' },
+          { label: 'Invite Sent', count: sent, color: 'text-blue-500' },
         ].map(({ label, count, color }) => (
           <div key={label} className="bg-white border border-gray-200 rounded-xl p-4 text-center">
             <p className={`text-2xl font-bold ${color}`}>{count}</p>
