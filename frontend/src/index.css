@@ -13,7 +13,7 @@
 
 @layer base {
   body {
-    background-color: #faf6f1;
+    background-color: #c9b8a8;
   }
 
   /* Warm white for all cards/surfaces */
@@ -32,6 +32,6 @@
 
   /* Warm table header */
   .bg-gray-50 {
-    background-color: #faf6f1 !important;
+    background-color: #d4c4b4 !important;
   }
 }

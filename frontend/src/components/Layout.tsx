@@ -11,7 +11,7 @@ export default function Layout() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 animate-fadein">
+    <div className="min-h-screen animate-fadein" style={{ backgroundColor: '#c9b8a8' }}>
       <nav className="bg-[#fdf8f3] shadow-sm border-b border-[#e8ddd4]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
