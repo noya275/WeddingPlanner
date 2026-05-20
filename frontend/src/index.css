@@ -18,19 +18,27 @@
 
   /* Semi-transparent cards */
   .bg-white {
-    background-color: rgba(255, 252, 248, 0.75) !important;
-    backdrop-filter: blur(8px);
+    background-color: rgba(255, 252, 248, 0.45) !important;
+    backdrop-filter: blur(10px);
   }
 
   .border-gray-200 {
-    border-color: rgba(200, 180, 160, 0.5) !important;
+    border-color: rgba(220, 195, 175, 0.45) !important;
   }
 
   .divide-gray-100 > * + * {
-    border-color: rgba(200, 180, 160, 0.35) !important;
+    border-color: rgba(220, 195, 175, 0.3) !important;
   }
 
   .bg-gray-50 {
-    background-color: rgba(240, 232, 220, 0.6) !important;
+    background-color: rgba(240, 232, 220, 0.35) !important;
   }
+
+  /* Lighten dark text so it reads well on transparent cards */
+  .text-gray-900 { color: #fff !important; }
+  .text-gray-800 { color: #f5ede6 !important; }
+  .text-gray-700 { color: #edddd4 !important; }
+  .text-gray-600 { color: #e0cfc4 !important; }
+  .text-gray-500 { color: #d4c0b4 !important; }
+  .text-gray-400 { color: #c8b4a8 !important; }
 }
