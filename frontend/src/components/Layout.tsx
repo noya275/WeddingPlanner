@@ -1,12 +1,13 @@
 import { Link, Outlet, useNavigate, useLocation } from 'react-router-dom'
 import PageTransition from './PageTransition'
+import { clearToken } from '../api/client'
 
 export default function Layout() {
   const navigate = useNavigate()
   const location = useLocation()
 
   function logout() {
-    localStorage.removeItem('token')
+    clearToken()
     navigate('/login')
   }
 
