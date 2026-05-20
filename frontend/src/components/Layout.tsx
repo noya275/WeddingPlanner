@@ -11,16 +11,20 @@ export default function Layout() {
   }
 
   return (
-    <div className="min-h-screen animate-fadein" style={{ backgroundColor: '#c9b8a8' }}>
-      <nav className="bg-[#fdf8f3] shadow-sm border-b border-[#e8ddd4]">
+    <div
+      className="min-h-screen animate-fadein"
+      style={{ backgroundImage: 'url(/WedBG.png)', backgroundSize: 'cover', backgroundPosition: 'center', backgroundAttachment: 'fixed' }}
+    >
+      <div className="min-h-screen" style={{ backgroundColor: 'rgba(0,0,0,0.35)' }}>
+      <nav style={{ backgroundColor: 'rgba(80, 30, 40, 0.55)', backdropFilter: 'blur(10px)', borderBottom: '1px solid rgba(180,120,100,0.3)' }}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
-            <Link to="/" className="text-xl font-semibold text-burgundy-700 tracking-tight" style={{ fontFamily: 'Georgia, "Times New Roman", serif' }}>
+            <Link to="/" className="text-xl font-semibold tracking-tight text-amber-100" style={{ fontFamily: 'Georgia, "Times New Roman", serif' }}>
               Wedding Planner
             </Link>
             <button
               onClick={logout}
-              className="text-sm text-gray-500 hover:text-gray-800 transition-colors"
+              className="text-sm text-amber-200/70 hover:text-amber-100 transition-colors"
             >
               Logout
             </button>
@@ -32,6 +36,7 @@ export default function Layout() {
           <Outlet />
         </PageTransition>
       </main>
+      </div>
     </div>
   )
 }
