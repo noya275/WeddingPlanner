@@ -5,6 +5,7 @@ import api from '../api/client'
 export default function Login() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [rememberMe, setRememberMe] = useState(true)
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
   const navigate = useNavigate()
@@ -17,8 +18,13 @@ export default function Login() {
       const form = new URLSearchParams()
       form.append('username', email)
       form.append('password', password)
+      if (rememberMe) form.append('scope', 'remember_me')
       const { data } = await api.post('/auth/login', form)
-      localStorage.setItem('token', data.access_token)
+      if (rememberMe) {
+        localStorage.setItem('token', data.access_token)
+      } else {
+        sessionStorage.setItem('token', data.access_token)
+      }
       navigate('/')
     } catch {
       setError('Invalid email or password')
@@ -54,6 +60,15 @@ export default function Login() {
               className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-burgundy-500 focus:border-transparent"
             />
           </div>
+          <label className="flex items-center gap-2 text-sm text-gray-600 cursor-pointer select-none">
+            <input
+              type="checkbox"
+              checked={rememberMe}
+              onChange={(e) => setRememberMe(e.target.checked)}
+              className="rounded accent-burgundy-700"
+            />
+            Remember me for a year
+          </label>
           {error && <p className="text-red-500 text-sm">{error}</p>}
           <button
             type="submit"

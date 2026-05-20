@@ -42,7 +42,9 @@ def login(form: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get
     user = db.query(User).filter(User.email == form.username).first()
     if not user or not verify_password(form.password, user.password_hash):
         raise HTTPException(status_code=401, detail="Invalid credentials")
-    return {"access_token": create_access_token(user.id)}
+    remember = "remember_me" in (form.scopes or [])
+    expire_days = 365 if remember else 7
+    return {"access_token": create_access_token(user.id, expire_days=expire_days)}
 
 
 @router.get("/me", response_model=UserOut)

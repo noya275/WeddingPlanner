@@ -9,12 +9,12 @@ import Vendors from './pages/Vendors'
 import Budget from './pages/Budget'
 import RSVPPage from './pages/RSVP'
 import Layout from './components/Layout'
+import { getToken } from './api/client'
 
 const queryClient = new QueryClient()
 
 function PrivateRoute({ children }: { children: React.ReactNode }) {
-  const token = localStorage.getItem('token')
-  return token ? <>{children}</> : <Navigate to="/login" replace />
+  return getToken() ? <>{children}</> : <Navigate to="/login" replace />
 }
 
 export default function App() {
