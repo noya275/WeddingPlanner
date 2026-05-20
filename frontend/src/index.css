@@ -1,3 +1,28 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@layer base {
+  body {
+    background-color: #faf6f1;
+  }
+
+  /* Warm white for all cards/surfaces */
+  .bg-white {
+    background-color: #fffdf9 !important;
+  }
+
+  /* Warm border tones */
+  .border-gray-200 {
+    border-color: #e8ddd4 !important;
+  }
+
+  .divide-gray-100 > * + * {
+    border-color: #f0e8e0 !important;
+  }
+
+  /* Warm table header */
+  .bg-gray-50 {
+    background-color: #faf6f1 !important;
+  }
+}
