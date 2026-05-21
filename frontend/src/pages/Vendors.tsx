@@ -90,7 +90,7 @@ export default function Vendors() {
   })
 
   const updateVendor = useMutation({
-    mutationFn: ({ id, ...data }: { id: number; name?: string; category?: string | null; contact_email?: string | null; contact_phone?: string | null; price?: number | null; actual?: number | null; is_paid?: boolean; status?: VendorStatus }) =>
+    mutationFn: ({ id, ...data }: { id: number; name?: string; category?: string | null; contact_name?: string | null; contact_email?: string | null; contact_phone?: string | null; price?: number | null; actual?: number | null; is_paid?: boolean; status?: VendorStatus }) =>
       api.patch(`/events/${eventId}/vendors/${id}`, data).then((r) => r.data),
     onSuccess: (updated: Vendor) => {
       queryClient.setQueryData(['vendors', eventId], (old: Vendor[] = []) =>
@@ -190,7 +190,7 @@ export default function Vendors() {
               <tr>
                 <th className="px-4 py-3 text-left">Vendor</th>
                 <th className="px-4 py-3 text-left">Category</th>
-                <th className="px-4 py-3 text-left">Email</th>
+                <th className="px-4 py-3 text-left">Contact Name</th>
                 <th className="px-4 py-3 text-left">Phone</th>
                 <th className="px-4 py-3 text-left">Estimated (₪)</th>
                 <th className="px-4 py-3 text-left">Actual (₪)</th>
@@ -211,8 +211,8 @@ export default function Vendors() {
                       onSave={(v) => updateVendor.mutate({ id: vendor.id, category: v })} />
                   </td>
                   <td className="px-4 py-2 min-w-[130px]">
-                    <EditableCell value={vendor.contact_email} placeholder="email" emptyDisplay="—"
-                      onSave={(v) => updateVendor.mutate({ id: vendor.id, contact_email: v })} />
+                    <EditableCell value={vendor.contact_name} placeholder="contact name" emptyDisplay="—"
+                      onSave={(v) => updateVendor.mutate({ id: vendor.id, contact_name: v })} />
                   </td>
                   <td className="px-4 py-2 min-w-[110px]">
                     <EditableCell value={vendor.contact_phone} placeholder="phone" emptyDisplay="—"
