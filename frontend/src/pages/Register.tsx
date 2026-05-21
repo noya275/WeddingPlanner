@@ -1,36 +1,35 @@
-import { useState } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
+import { useMutation } from '@tanstack/react-query'
+import { useState } from 'react'
+import axios from 'axios'
 import api from '../api/client'
 
 export default function Register() {
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
-  const [error, setError] = useState('')
-  const [loading, setLoading] = useState(false)
   const navigate = useNavigate()
 
-  async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault()
-    setError('')
-    setLoading(true)
-    try {
+  const register = useMutation({
+    mutationFn: async () => {
       await api.post('/auth/register', { name, email, password })
       const form = new URLSearchParams()
       form.append('username', email)
       form.append('password', password)
       const { data } = await api.post('/auth/login', form)
+      return data
+    },
+    onSuccess: (data) => {
       localStorage.setItem('token', data.access_token)
       navigate('/')
-    } catch (err: unknown) {
-      const message =
-        (err as { response?: { data?: { detail?: string } } })?.response?.data?.detail
-        ?? 'Registration failed'
-      setError(message)
-    } finally {
-      setLoading(false)
-    }
-  }
+    },
+  })
+
+  const errorMessage = register.error
+    ? (axios.isAxiosError(register.error)
+        ? register.error.response?.data?.detail ?? 'Registration failed'
+        : 'Registration failed')
+    : null
 
   return (
     <div
@@ -47,10 +46,10 @@ export default function Register() {
         </div>
 
         <div className="bg-white/20 backdrop-blur-md rounded-xl shadow-lg border border-white/30 p-5">
-          <h1 className="text-xl font-bold text-white mb-1">Create account</h1>
+          <h2 className="text-xl font-bold text-white mb-1">Create account</h2>
           <p className="text-white/70 text-sm mb-5">Start planning your perfect wedding</p>
 
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form onSubmit={(e) => { e.preventDefault(); register.mutate() }} className="space-y-4">
             <div>
               <label className="block text-sm font-medium text-white/80 mb-1">Name</label>
               <input
@@ -82,17 +81,17 @@ export default function Register() {
                 className="w-full bg-white/20 border border-white/30 rounded-lg px-3 py-2 text-sm text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-white/50"
               />
             </div>
-            {error && (
+            {errorMessage && (
               <div className="bg-red-500/20 border border-red-400/40 rounded-lg px-4 py-3 text-white text-sm">
-                {error}
+                {errorMessage}
               </div>
             )}
             <button
               type="submit"
-              disabled={loading}
+              disabled={register.isPending}
               className="w-full bg-burgundy-700 text-white py-2 px-4 rounded-lg hover:bg-burgundy-800 font-medium text-sm disabled:opacity-50 transition-colors"
             >
-              {loading ? 'Creating account...' : 'Create account'}
+              {register.isPending ? 'Creating account...' : 'Create account'}
             </button>
           </form>
 
