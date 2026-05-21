@@ -16,6 +16,7 @@ export default function EventLayout() {
   const { data: event } = useQuery<Event>({
     queryKey: ['event', eventId],
     queryFn: () => api.get(`/events/${eventId}`).then((r) => r.data),
+    staleTime: 30_000,
   })
 
   return (

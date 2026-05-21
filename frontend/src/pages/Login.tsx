@@ -48,7 +48,7 @@ export default function Login() {
         </div>
 
         <div className="bg-white/20 backdrop-blur-md rounded-xl shadow-lg border border-white/30 p-5">
-        <h1 className="text-xl font-bold text-white mb-1">Welcome back</h1>
+        <h2 className="text-xl font-bold text-white mb-1">Welcome back</h2>
         <p className="text-white/70 text-sm mb-5">Sign in to your account</p>
 
         <form onSubmit={handleSubmit} className="space-y-4">

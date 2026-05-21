@@ -35,7 +35,7 @@ function DraggableGuest({ guest }: { guest: Guest }) {
   )
 }
 
-function SeatPosition({ guest, angle, isDragging }: { guest: Guest | null; angle: number; isDragging: boolean }) {
+function SeatPosition({ guest, angle }: { guest: Guest | null; angle: number }) {
   const cx = CONTAINER / 2
   const cy = CONTAINER / 2
   const sx = cx + Math.cos(angle) * SEAT_RING
@@ -66,7 +66,7 @@ function SeatPosition({ guest, angle, isDragging }: { guest: Guest | null; angle
             top: ny,
             transform: `translate(-50%, -50%)${transform ? ` translate(${transform.x}px, ${transform.y}px)` : ''}`,
             zIndex: thisDragging ? 50 : 1,
-            opacity: thisDragging || isDragging ? 0 : 1,
+            opacity: thisDragging ? 0 : 1,
             whiteSpace: 'nowrap',
           }}
           {...listeners}
@@ -125,7 +125,7 @@ function TableZone({ tableNum, guests, capacity, isDone, onToggleDone }: { table
       {Array.from({ length: slots }, (_, i) => {
         const angle = (i / slots) * 2 * Math.PI - Math.PI / 2
         return (
-          <SeatPosition key={i} angle={angle} guest={guests[i] ?? null} isDragging={false} />
+          <SeatPosition key={i} angle={angle} guest={guests[i] ?? null} />
         )
       })}
     </div>
