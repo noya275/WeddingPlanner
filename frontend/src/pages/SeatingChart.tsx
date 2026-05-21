@@ -154,7 +154,7 @@ export default function SeatingChart() {
         </div>
       </div>
 
-      <DndContext sensors={sensors} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
+      <DndContext sensors={sensors} modifiers={[snapCenterToCursor]} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
         <div className="mb-6">
           <UnassignedZone guests={unassigned} />
         </div>
@@ -170,7 +170,7 @@ export default function SeatingChart() {
           ))}
         </div>
 
-        <DragOverlay modifiers={[snapCenterToCursor]}>
+        <DragOverlay>
           {activeGuest && (
             <div className="bg-white border border-burgundy-300 shadow-lg rounded-lg px-3 py-1.5 text-sm font-medium text-gray-800 cursor-grabbing">
               {activeGuest.name}
