@@ -1,8 +1,10 @@
 import axios from 'axios'
 
-const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL ?? '/api',
-})
+const BASE_URL = import.meta.env.VITE_API_URL ?? '/api'
+
+const api = axios.create({ baseURL: BASE_URL })
+
+export const publicApi = axios.create({ baseURL: BASE_URL })
 
 export function getToken() {
   return localStorage.getItem('token') || sessionStorage.getItem('token')

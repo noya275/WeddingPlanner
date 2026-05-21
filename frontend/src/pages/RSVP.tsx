@@ -1,21 +1,32 @@
 import { useState } from 'react'
 import { useParams } from 'react-router-dom'
 import { useQuery, useMutation } from '@tanstack/react-query'
-import axios from 'axios'
+import { publicApi } from '../api/client'
+import type { RSVPInfo } from '../api/types'
 
-const publicApi = axios.create({ baseURL: import.meta.env.VITE_API_URL ?? '/api' })
+type RSVPChoice = 'confirmed' | 'declined' | 'maybe'
 
-interface RSVPInfo {
-  name: string
-  rsvp_status: string
-  event_title: string
-  event_date: string | null
+const THANK_YOU: Record<RSVPChoice, { emoji: string; title: string; body: (name: string, eventTitle: string) => string }> = {
+  confirmed: {
+    emoji: '🎉',
+    title: "We'll see you there!",
+    body: (name, eventTitle) => `Thanks ${name}! Your attendance at ${eventTitle} has been confirmed.`,
+  },
+  declined: {
+    emoji: '💌',
+    title: "We understand, thanks!",
+    body: (name) => `Thanks for letting us know, ${name}. You'll be missed!`,
+  },
+  maybe: {
+    emoji: '🤔',
+    title: "No worries, we'll keep you posted!",
+    body: (name, eventTitle) => `Thanks ${name}! We hope you'll be able to make it to ${eventTitle}.`,
+  },
 }
 
 export default function RSVPPage() {
   const { token } = useParams<{ token: string }>()
-  const [submitted, setSubmitted] = useState(false)
-  const [choice, setChoice] = useState<'confirmed' | 'declined' | 'maybe' | null>(null)
+  const [submittedStatus, setSubmittedStatus] = useState<RSVPChoice | null>(null)
 
   const { data, isLoading, isError } = useQuery<RSVPInfo>({
     queryKey: ['rsvp', token],
@@ -23,12 +34,9 @@ export default function RSVPPage() {
   })
 
   const submit = useMutation({
-    mutationFn: (status: 'confirmed' | 'declined' | 'maybe') =>
+    mutationFn: (status: RSVPChoice) =>
       publicApi.post(`/public/rsvp/${token}`, { status }),
-    onSuccess: (_, status) => {
-      setChoice(status)
-      setSubmitted(true)
-    },
+    onSuccess: (_, status) => setSubmittedStatus(status),
   })
 
   if (isLoading) {
@@ -50,18 +58,14 @@ export default function RSVPPage() {
     )
   }
 
-  if (submitted) {
-    const thankYou = {
-      confirmed: { emoji: '🎉', title: "We'll see you there!", body: `Thanks ${data.name}! Your attendance at ${data.event_title} has been confirmed.` },
-      declined:  { emoji: '💌', title: 'We understand, thanks!', body: `Thanks for letting us know, ${data.name}. You'll be missed!` },
-      maybe:     { emoji: '🤔', title: "No worries, we'll keep you posted!", body: `Thanks ${data.name}! We hope you'll be able to make it to ${data.event_title}.` },
-    }[choice!]
+  if (submittedStatus) {
+    const { emoji, title, body } = THANK_YOU[submittedStatus]
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
         <div className="max-w-sm w-full mx-4 text-center">
-          <div className="text-5xl mb-4">{thankYou.emoji}</div>
-          <h1 className="text-2xl font-bold text-gray-900 mb-2">{thankYou.title}</h1>
-          <p className="text-gray-500">{thankYou.body}</p>
+          <div className="text-5xl mb-4">{emoji}</div>
+          <h1 className="text-2xl font-bold text-gray-900 mb-2">{title}</h1>
+          <p className="text-gray-500">{body(data.name, data.event_title)}</p>
         </div>
       </div>
     )
@@ -78,16 +82,15 @@ export default function RSVPPage() {
           {data.event_date && (
             <p className="text-gray-400 text-sm mb-6">
               {new Date(data.event_date).toLocaleDateString(undefined, {
-                weekday: 'long',
-                year: 'numeric',
-                month: 'long',
-                day: 'numeric',
+                weekday: 'long', year: 'numeric', month: 'long', day: 'numeric',
               })}
             </p>
           )}
 
           <div className="border-t border-gray-100 pt-6">
-            <p className="text-gray-600 mb-1 text-sm">Hi <span className="font-semibold text-gray-900">{data.name}</span>,</p>
+            <p className="text-gray-600 mb-1 text-sm">
+              Hi <span className="font-semibold text-gray-900">{data.name}</span>,
+            </p>
             <p className="text-gray-500 text-sm mb-6">Will you be joining us?</p>
 
             <div className="flex flex-col gap-3">

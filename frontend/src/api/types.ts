@@ -46,6 +46,13 @@ export interface Task {
   category: string | null
 }
 
+export interface RSVPInfo {
+  name: string
+  rsvp_status: string
+  event_title: string
+  event_date: string | null
+}
+
 export interface Vendor {
   id: number
   event_id: number
