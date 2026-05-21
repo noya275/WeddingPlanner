@@ -20,4 +20,3 @@ class Event(Base):
     guests = relationship("Guest", back_populates="event", cascade="all, delete-orphan")
     tasks = relationship("Task", back_populates="event", cascade="all, delete-orphan")
     vendors = relationship("Vendor", back_populates="event", cascade="all, delete-orphan")
-    budget_items = relationship("BudgetItem", back_populates="event", cascade="all, delete-orphan")

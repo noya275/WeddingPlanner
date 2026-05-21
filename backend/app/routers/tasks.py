@@ -2,20 +2,12 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from typing import List
 from ..database import get_db
-from ..models.event import Event
 from ..models.task import Task
 from ..models.user import User
 from ..schemas.task import TaskCreate, TaskUpdate, TaskOut
-from .auth import get_current_user
+from ..deps import get_current_user, get_event_or_404
 
 router = APIRouter(tags=["tasks"])
-
-
-def get_event_or_404(event_id: int, user_id: int, db: Session) -> Event:
-    event = db.query(Event).filter(Event.id == event_id, Event.user_id == user_id).first()
-    if not event:
-        raise HTTPException(status_code=404, detail="Event not found")
-    return event
 
 
 def get_task_or_404(task_id: int, event_id: int, db: Session) -> Task:
