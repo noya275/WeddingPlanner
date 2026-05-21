@@ -5,6 +5,7 @@ import {
   DndContext, DragOverlay, PointerSensor, useSensor, useSensors,
   useDroppable, useDraggable,
 } from '@dnd-kit/core'
+import { snapCenterToCursor } from '@dnd-kit/modifiers'
 import type { DragEndEvent, DragStartEvent } from '@dnd-kit/core'
 import api from '../api/client'
 import type { Guest } from '../api/types'
@@ -169,7 +170,7 @@ export default function SeatingChart() {
           ))}
         </div>
 
-        <DragOverlay>
+        <DragOverlay modifiers={[snapCenterToCursor]}>
           {activeGuest && (
             <div className="bg-white border border-burgundy-300 shadow-lg rounded-lg px-3 py-1.5 text-sm font-medium text-gray-800 cursor-grabbing">
               {activeGuest.name}
