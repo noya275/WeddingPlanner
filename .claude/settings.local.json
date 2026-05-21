@@ -4,7 +4,29 @@
       "Bash(git init *)",
       "Bash(git add *)",
       "Bash(pkill -f \"uvicorn\")",
-      "Bash(pkill -f \"vite\")"
+      "Bash(pkill -f \"vite\")",
+      "Bash(open *)",
+      "Bash(npm run *)",
+      "Bash(echo \"Frontend PID: $!\")",
+      "Bash(curl *)",
+      "Bash(pkill -f \"vite --host\")",
+      "Bash(ipconfig getifaddr *)",
+      "Bash(brew install *)",
+      "Bash(chmod +x *)",
+      "Bash(pkill -f \"cloudflared\")",
+      "Bash(ssh -o StrictHostKeyChecking=no -o ServerAliveInterval=30 -R noyaomer:80:localhost:5173 serveo.net)",
+      "Bash(pkill -f \"serveo\")",
+      "Bash(ssh -T -o StrictHostKeyChecking=no -o ServerAliveInterval=30 -R noyaomer:80:localhost:5173 serveo.net)",
+      "Bash(cloudflared tunnel *)",
+      "Bash(npm uninstall *)",
+      "Bash(python3 -c ' *)",
+      "Bash(npm install *)",
+      "Bash(npm list *)",
+      "Bash(python3 -m json.tool)",
+      "Bash(grep -n \"\\\\$\\\\|dollar\\\\|USD\\\\|currency\\\\|toLocaleString\\\\|toFixed\" \"/Users/noya/Downloads/Personal/Personal Projects/WeddingPlanner/frontend/src/pages/Budget.tsx\")",
+      "Bash(grep *)",
+      "Bash(sqlite3 wedding_planner.db \"DELETE FROM guests WHERE name='hi'\")",
+      "Bash(npx tsc *)"
     ]
   }
 }

@@ -4,17 +4,79 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import api from '../api/client'
 import type { Event } from '../api/types'
 
+interface EventFormValues {
+  title: string
+  date: string
+  venue: string
+}
+
+function EventForm({
+  initialValues,
+  onSubmit,
+  onCancel,
+  isPending,
+  submitLabel,
+}: {
+  initialValues: EventFormValues
+  onSubmit: (values: EventFormValues) => void
+  onCancel: () => void
+  isPending: boolean
+  submitLabel: string
+}) {
+  const [title, setTitle] = useState(initialValues.title)
+  const [date, setDate] = useState(initialValues.date)
+  const [venue, setVenue] = useState(initialValues.venue)
+
+  return (
+    <form
+      onSubmit={(e) => { e.preventDefault(); onSubmit({ title, date, venue }) }}
+      className="bg-white border border-burgundy-200 rounded-2xl p-6 space-y-3"
+    >
+      <input
+        value={title}
+        onChange={(e) => setTitle(e.target.value)}
+        required
+        placeholder="Event name"
+        className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-burgundy-500"
+      />
+      <div className="grid grid-cols-2 gap-3">
+        <input
+          type="date"
+          value={date}
+          onChange={(e) => setDate(e.target.value)}
+          className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-burgundy-500"
+        />
+        <input
+          value={venue}
+          onChange={(e) => setVenue(e.target.value)}
+          placeholder="Venue"
+          className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-burgundy-500"
+        />
+      </div>
+      <div className="flex gap-2">
+        <button
+          type="submit"
+          disabled={isPending}
+          className="flex-1 bg-burgundy-700 text-white px-3 py-2 rounded-lg text-sm font-medium hover:bg-burgundy-800 disabled:opacity-50"
+        >
+          {isPending ? `${submitLabel}...` : submitLabel}
+        </button>
+        <button
+          type="button"
+          onClick={onCancel}
+          className="flex-1 px-3 py-2 rounded-lg text-sm text-gray-600 hover:bg-gray-100"
+        >
+          Cancel
+        </button>
+      </div>
+    </form>
+  )
+}
+
 export default function Dashboard() {
   const queryClient = useQueryClient()
   const [showForm, setShowForm] = useState(false)
-  const [title, setTitle] = useState('')
-  const [date, setDate] = useState('')
-  const [venue, setVenue] = useState('')
-
   const [editingId, setEditingId] = useState<number | null>(null)
-  const [editTitle, setEditTitle] = useState('')
-  const [editDate, setEditDate] = useState('')
-  const [editVenue, setEditVenue] = useState('')
 
   const { data: events = [], isLoading } = useQuery<Event[]>({
     queryKey: ['events'],
@@ -23,20 +85,17 @@ export default function Dashboard() {
   })
 
   const createEvent = useMutation({
-    mutationFn: (payload: { title: string; date?: string; venue?: string }) =>
-      api.post('/events/', payload).then((r) => r.data),
+    mutationFn: (values: EventFormValues) =>
+      api.post('/events/', { title: values.title, date: values.date || undefined, venue: values.venue || undefined }).then((r) => r.data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['events'] })
       setShowForm(false)
-      setTitle('')
-      setDate('')
-      setVenue('')
     },
   })
 
   const updateEvent = useMutation({
-    mutationFn: ({ id, ...payload }: { id: number; title: string; date?: string; venue?: string }) =>
-      api.patch(`/events/${id}`, payload).then((r) => r.data),
+    mutationFn: ({ id, values }: { id: number; values: EventFormValues }) =>
+      api.patch(`/events/${id}`, { title: values.title, date: values.date || undefined, venue: values.venue || undefined }).then((r) => r.data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['events'] })
       setEditingId(null)
@@ -47,24 +106,6 @@ export default function Dashboard() {
     mutationFn: (id: number) => api.delete(`/events/${id}`),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['events'] }),
   })
-
-  function startEdit(event: Event) {
-    setEditingId(event.id)
-    setEditTitle(event.title)
-    setEditDate(event.date ?? '')
-    setEditVenue(event.venue ?? '')
-  }
-
-  function handleCreate(e: React.FormEvent) {
-    e.preventDefault()
-    createEvent.mutate({ title, date: date || undefined, venue: venue || undefined })
-  }
-
-  function handleUpdate(e: React.FormEvent) {
-    e.preventDefault()
-    if (!editingId) return
-    updateEvent.mutate({ id: editingId, title: editTitle, date: editDate || undefined, venue: editVenue || undefined })
-  }
 
   return (
     <div>
@@ -79,60 +120,15 @@ export default function Dashboard() {
       </div>
 
       {showForm && (
-        <form
-          onSubmit={handleCreate}
-          className="bg-white border border-gray-200 rounded-xl p-6 mb-6 space-y-4"
-        >
-          <h2 className="font-semibold text-gray-800">New Event</h2>
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Event Name <span className="text-burgundy-600">*</span>
-              </label>
-              <input
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
-                required
-                placeholder="e.g. Sarah & John's Wedding"
-                className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-burgundy-500"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Date</label>
-              <input
-                type="date"
-                value={date}
-                onChange={(e) => setDate(e.target.value)}
-                className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-burgundy-500"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Venue</label>
-              <input
-                value={venue}
-                onChange={(e) => setVenue(e.target.value)}
-                placeholder="e.g. The Grand Ballroom"
-                className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-burgundy-500"
-              />
-            </div>
-          </div>
-          <div className="flex gap-2">
-            <button
-              type="submit"
-              disabled={createEvent.isPending}
-              className="bg-burgundy-700 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-burgundy-800 disabled:opacity-50"
-            >
-              {createEvent.isPending ? 'Creating...' : 'Create'}
-            </button>
-            <button
-              type="button"
-              onClick={() => setShowForm(false)}
-              className="px-4 py-2 rounded-lg text-sm text-gray-600 hover:bg-gray-100"
-            >
-              Cancel
-            </button>
-          </div>
-        </form>
+        <div className="mb-6">
+          <EventForm
+            initialValues={{ title: '', date: '', venue: '' }}
+            onSubmit={(values) => createEvent.mutate(values)}
+            onCancel={() => setShowForm(false)}
+            isPending={createEvent.isPending}
+            submitLabel="Create"
+          />
+        </div>
       )}
 
       {isLoading ? (
@@ -146,49 +142,14 @@ export default function Dashboard() {
         <div className="space-y-4">
           {events.map((event) =>
             editingId === event.id ? (
-              <form
+              <EventForm
                 key={event.id}
-                onSubmit={handleUpdate}
-                className="bg-white border border-burgundy-200 rounded-2xl p-6 space-y-3"
-              >
-                <input
-                  value={editTitle}
-                  onChange={(e) => setEditTitle(e.target.value)}
-                  required
-                  placeholder="Event name"
-                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-burgundy-500"
-                />
-                <div className="grid grid-cols-2 gap-3">
-                  <input
-                    type="date"
-                    value={editDate}
-                    onChange={(e) => setEditDate(e.target.value)}
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-burgundy-500"
-                  />
-                  <input
-                    value={editVenue}
-                    onChange={(e) => setEditVenue(e.target.value)}
-                    placeholder="Venue"
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-burgundy-500"
-                  />
-                </div>
-                <div className="flex gap-2">
-                  <button
-                    type="submit"
-                    disabled={updateEvent.isPending}
-                    className="flex-1 bg-burgundy-700 text-white px-3 py-2 rounded-lg text-sm font-medium hover:bg-burgundy-800 disabled:opacity-50"
-                  >
-                    Save
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setEditingId(null)}
-                    className="flex-1 px-3 py-2 rounded-lg text-sm text-gray-600 hover:bg-gray-100"
-                  >
-                    Cancel
-                  </button>
-                </div>
-              </form>
+                initialValues={{ title: event.title, date: event.date ?? '', venue: event.venue ?? '' }}
+                onSubmit={(values) => updateEvent.mutate({ id: event.id, values })}
+                onCancel={() => setEditingId(null)}
+                isPending={updateEvent.isPending}
+                submitLabel="Save"
+              />
             ) : (
               <div
                 key={event.id}
@@ -206,7 +167,7 @@ export default function Dashboard() {
                   </Link>
                   <div className="flex gap-1 shrink-0">
                     <button
-                      onClick={() => startEdit(event)}
+                      onClick={() => setEditingId(event.id)}
                       style={{ color: '#7a6a60' }}
                       className="hover:text-burgundy-600 text-2xl px-2 py-1 transition-colors"
                       title="Edit event"
