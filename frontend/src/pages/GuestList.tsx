@@ -81,7 +81,7 @@ function SideTable({ title, emoji, guests, onUpdate, onDelete, onSendRSVP, onAdd
     <div className="bg-white border border-gray-200 rounded-xl overflow-hidden">
       <div className="px-4 py-3 border-b border-gray-200 flex items-center justify-between">
         <h2 className="font-semibold text-gray-900">{emoji} {title}</h2>
-        <span className="text-xs text-gray-500">{guests.length} guests</span>
+        <span className="text-base font-bold text-gray-500">{guests.length} guests</span>
       </div>
       <table className="w-full text-sm">
         <thead className="bg-gray-50 text-gray-500 text-xs uppercase tracking-wide">
@@ -110,7 +110,7 @@ function SideTable({ title, emoji, guests, onUpdate, onDelete, onSendRSVP, onAdd
                 <select
                   value={guest.rsvp_status}
                   onChange={(e) => onUpdate({ id: guest.id, rsvp_status: e.target.value as RSVPStatus })}
-                  className={`text-xs font-medium px-2 py-1 rounded-full border-0 cursor-pointer ${STATUS_COLORS[guest.rsvp_status]}`}
+                  className={`text-sm font-medium px-2 py-1 rounded-full border-0 cursor-pointer ${STATUS_COLORS[guest.rsvp_status]}`}
                 >
                   <option value="pending">Pending</option>
                   <option value="confirmed">Confirmed</option>
@@ -251,7 +251,7 @@ export default function GuestList() {
   return (
     <div>
       <div className="flex items-center gap-3 mb-6">
-        <Link to="/" className="text-gray-400 hover:text-gray-600 text-sm">← Events</Link>
+        <Link to="/" className="text-gray-400 hover:text-gray-600 text-base font-bold">← Events</Link>
         <h1 className="text-2xl font-bold text-gray-900">Guest List</h1>
       </div>
 
@@ -264,14 +264,14 @@ export default function GuestList() {
           { label: 'Invite Sent', count: sent, color: 'text-blue-500' },
         ].map(({ label, count, color }) => (
           <div key={label} className="bg-white border border-gray-200 rounded-xl p-4 text-center">
-            <p className={`text-2xl font-bold ${color}`}>{count}</p>
-            <p className="text-sm text-gray-500 mt-1">{label}</p>
+            <p className={`text-4xl font-bold ${color}`}>{count}</p>
+            <p className="text-base text-gray-500 mt-1">{label}</p>
           </div>
         ))}
       </div>
 
       <div className="flex items-center justify-between mb-4">
-        <p className="text-sm text-gray-500">{guests.length} guests total</p>
+        <p className="text-base font-bold text-gray-500">{guests.length} guests total</p>
         <input
           value={search}
           onChange={(e) => setSearch(e.target.value)}

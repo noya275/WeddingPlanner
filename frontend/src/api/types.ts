@@ -55,6 +55,8 @@ export interface Vendor {
   contact_email: string | null
   contact_phone: string | null
   price: number | null
+  actual: number | null
+  is_paid: boolean
   status: VendorStatus
   notes: string | null
 }

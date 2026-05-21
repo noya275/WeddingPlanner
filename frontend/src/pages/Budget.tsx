@@ -81,10 +81,10 @@ export default function Budget() {
   return (
     <div>
       <div className="flex items-center gap-3 mb-6">
-        <Link to="/" className="text-gray-400 hover:text-gray-600 text-sm">
+        <Link to="/" className="text-gray-400 hover:text-gray-600 text-base font-bold">
           ← Events
         </Link>
-        <h1 className="text-2xl font-bold text-gray-900">Budget</h1>
+        <h1 className="text-3xl font-bold text-gray-900">Budget</h1>
       </div>
 
       {/* Overview */}
@@ -135,22 +135,22 @@ export default function Budget() {
 
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
           <div>
-            <p className="text-xs text-gray-400 mb-1">Total Budget</p>
-            <p className="text-xl font-bold text-gray-900">
+            <p className="text-base font-bold text-gray-400 mb-1">Total Budget</p>
+            <p className="text-3xl font-bold text-gray-900">
               {budgetTotal != null ? fmt(Number(budgetTotal)) : '—'}
             </p>
           </div>
           <div>
-            <p className="text-xs text-gray-400 mb-1">Estimated</p>
-            <p className="text-xl font-bold text-gray-700">{fmt(totalEstimated)}</p>
+            <p className="text-base font-bold text-gray-400 mb-1">Estimated</p>
+            <p className="text-3xl font-bold text-gray-700">{fmt(totalEstimated)}</p>
           </div>
           <div>
-            <p className="text-xs text-gray-400 mb-1">Actual Spend</p>
-            <p className="text-xl font-bold text-gray-700">{fmt(totalActual)}</p>
+            <p className="text-base font-bold text-gray-400 mb-1">Actual Spend</p>
+            <p className="text-3xl font-bold text-gray-700">{fmt(totalActual)}</p>
           </div>
           <div>
-            <p className="text-xs text-gray-400 mb-1">Remaining</p>
-            <p className={`text-xl font-bold ${remaining != null && remaining < 0 ? 'text-red-600' : 'text-green-600'}`}>
+            <p className="text-base font-bold text-gray-400 mb-1">Remaining</p>
+            <p className={`text-3xl font-bold ${remaining != null && remaining < 0 ? 'text-red-600' : 'text-green-600'}`}>
               {remaining != null ? fmt(remaining) : '—'}
             </p>
           </div>

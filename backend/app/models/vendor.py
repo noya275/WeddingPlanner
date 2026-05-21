@@ -1,5 +1,5 @@
 import enum
-from sqlalchemy import Column, Integer, String, ForeignKey, Enum, Numeric
+from sqlalchemy import Column, Integer, String, ForeignKey, Enum, Numeric, Boolean
 from sqlalchemy.orm import relationship
 from ..database import Base
 
@@ -22,6 +22,8 @@ class Vendor(Base):
     contact_email = Column(String)
     contact_phone = Column(String)
     price = Column(Numeric(10, 2))
+    actual = Column(Numeric(10, 2))
+    is_paid = Column(Boolean, default=False)
     status = Column(Enum(VendorStatus), default=VendorStatus.prospect)
     notes = Column(String)
 

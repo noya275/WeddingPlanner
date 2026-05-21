@@ -71,7 +71,7 @@ export default function Tasks() {
   return (
     <div>
       <div className="flex items-center gap-3 mb-6">
-        <Link to="/" className="text-gray-400 hover:text-gray-600 text-sm">
+        <Link to="/" className="text-gray-400 hover:text-gray-600 text-base font-bold">
           ← Events
         </Link>
         <h1 className="text-2xl font-bold text-gray-900">Tasks</h1>
@@ -168,9 +168,9 @@ export default function Tasks() {
             return (
               <div key={status} className="bg-white border border-gray-200 rounded-xl p-4">
                 <div className="flex items-center gap-2 mb-4">
-                  <span className={`w-2 h-2 rounded-full ${dot}`} />
-                  <span className="text-sm font-semibold text-gray-700">{label}</span>
-                  <span className="text-xs text-gray-400 ml-auto">{columnTasks.length}</span>
+                  <span className={`w-2.5 h-2.5 rounded-full ${dot}`} />
+                  <span className="text-base font-bold text-gray-700">{label}</span>
+                  <span className="text-base font-bold text-gray-400 ml-auto">{columnTasks.length}</span>
                 </div>
                 <div className="space-y-2">
                   {columnTasks.map((task) => (

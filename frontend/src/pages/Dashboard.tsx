@@ -208,27 +208,26 @@ export default function Dashboard() {
                     <button
                       onClick={() => startEdit(event)}
                       style={{ color: '#7a6a60' }}
-                      className="hover:text-burgundy-600 text-base px-2 py-1 transition-colors"
+                      className="hover:text-burgundy-600 text-2xl px-2 py-1 transition-colors"
                       title="Edit event"
                     >
                       ✎
                     </button>
                     <button
-                      onClick={() => deleteEvent.mutate(event.id)}
+                      onClick={() => { if (window.confirm(`Delete "${event.title}"? This cannot be undone.`)) deleteEvent.mutate(event.id) }}
                       style={{ color: '#7a6a60' }}
-                      className="hover:text-red-500 text-xl leading-none px-1 transition-colors"
+                      className="hover:text-red-500 text-2xl leading-none px-1 transition-colors"
                       title="Delete event"
                     >
                       ×
                     </button>
                   </div>
                 </div>
-                <div className="grid grid-cols-5 gap-3">
+                <div className="grid grid-cols-4 gap-3">
                   {[
                     { label: 'Guests', path: 'guests', icon: '👥', gray: true, textColor: undefined },
                     { label: 'Tasks', path: 'tasks', icon: '✓', gray: false, textColor: '#555' },
-                    { label: 'Vendors', path: 'vendors', icon: '🤝🏼', gray: false, textColor: undefined },
-                    { label: 'Budget', path: 'budget', icon: '₪', gray: false, textColor: '#555' },
+                    { label: 'Vendors & Budget', path: 'vendors', icon: '🤝🏼', gray: false, textColor: undefined },
                     { label: 'Seating', path: 'seating', icon: '🪑', gray: false, textColor: undefined },
                   ].map(({ label, path, icon, gray, textColor }) => (
                     <Link

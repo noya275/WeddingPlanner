@@ -6,7 +6,6 @@ import Dashboard from './pages/Dashboard'
 import GuestList from './pages/GuestList'
 import Tasks from './pages/Tasks'
 import Vendors from './pages/Vendors'
-import Budget from './pages/Budget'
 import RSVPPage from './pages/RSVP'
 import SeatingChart from './pages/SeatingChart'
 import Layout from './components/Layout'
@@ -38,7 +37,6 @@ export default function App() {
             <Route path="events/:eventId/guests" element={<GuestList />} />
             <Route path="events/:eventId/tasks" element={<Tasks />} />
             <Route path="events/:eventId/vendors" element={<Vendors />} />
-            <Route path="events/:eventId/budget" element={<Budget />} />
             <Route path="events/:eventId/seating" element={<SeatingChart />} />
           </Route>
           <Route path="*" element={<Navigate to="/" replace />} />

@@ -11,6 +11,8 @@ from .core.config import settings as _s
 with engine.connect() as _conn:
     for _stmt in [
         "ALTER TABLE guests ADD COLUMN side VARCHAR",
+        "ALTER TABLE vendors ADD COLUMN actual NUMERIC(10,2)",
+        "ALTER TABLE vendors ADD COLUMN is_paid BOOLEAN DEFAULT FALSE",
     ]:
         try:
             _conn.execute(text(_stmt))

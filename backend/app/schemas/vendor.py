@@ -11,6 +11,8 @@ class VendorCreate(BaseModel):
     contact_email: Optional[str] = None
     contact_phone: Optional[str] = None
     price: Optional[Decimal] = None
+    actual: Optional[Decimal] = None
+    is_paid: bool = False
     status: VendorStatus = VendorStatus.prospect
     notes: Optional[str] = None
 
@@ -22,6 +24,8 @@ class VendorUpdate(BaseModel):
     contact_email: Optional[str] = None
     contact_phone: Optional[str] = None
     price: Optional[Decimal] = None
+    actual: Optional[Decimal] = None
+    is_paid: Optional[bool] = None
     status: Optional[VendorStatus] = None
     notes: Optional[str] = None
 

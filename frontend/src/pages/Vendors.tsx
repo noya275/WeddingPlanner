@@ -1,8 +1,9 @@
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import api from '../api/client'
-import type { Vendor, VendorStatus } from '../api/types'
+import type { Vendor, VendorStatus, Event } from '../api/types'
+import EditableCell from '../components/EditableCell'
 
 const STATUS_COLORS: Record<VendorStatus, string> = {
   prospect: 'bg-gray-100 text-gray-600',
@@ -11,16 +12,61 @@ const STATUS_COLORS: Record<VendorStatus, string> = {
   cancelled: 'bg-red-100 text-red-600',
 }
 
+function AddRow({ onAdd }: { onAdd: (name: string, category: string) => void }) {
+  const [name, setName] = useState('')
+  const [category, setCategory] = useState('')
+  const nameRef = useRef<HTMLInputElement>(null)
+  const categoryRef = useRef<HTMLInputElement>(null)
+
+  function submit() {
+    if (!name.trim()) return
+    onAdd(name.trim(), category.trim())
+    setName('')
+    setCategory('')
+    setTimeout(() => nameRef.current?.focus(), 0)
+  }
+
+  return (
+    <tr className="border-t border-dashed border-gray-200">
+      <td className="px-4 py-2">
+        <input
+          ref={nameRef}
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter') { e.preventDefault(); categoryRef.current?.focus() }
+          }}
+          placeholder="+ Add vendor..."
+          className="w-full text-sm outline-none bg-transparent text-gray-700 guest-add-input"
+        />
+      </td>
+      <td className="px-4 py-2">
+        <input
+          ref={categoryRef}
+          value={category}
+          onChange={(e) => setCategory(e.target.value)}
+          onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); submit() } }}
+          onBlur={() => { if (name.trim()) submit() }}
+          placeholder="category"
+          className="w-full text-sm outline-none bg-transparent text-gray-700 guest-add-input"
+        />
+      </td>
+      <td colSpan={6} />
+    </tr>
+  )
+}
+
 export default function Vendors() {
   const { eventId } = useParams<{ eventId: string }>()
   const queryClient = useQueryClient()
-  const [showForm, setShowForm] = useState(false)
-  const [name, setName] = useState('')
-  const [category, setCategory] = useState('')
-  const [contactName, setContactName] = useState('')
-  const [contactEmail, setContactEmail] = useState('')
-  const [contactPhone, setContactPhone] = useState('')
-  const [price, setPrice] = useState('')
+  const [editBudget, setEditBudget] = useState(false)
+  const [budgetInput, setBudgetInput] = useState('')
+
+  const { data: event } = useQuery<Event>({
+    queryKey: ['event', eventId],
+    queryFn: () => api.get(`/events/${eventId}`).then((r) => r.data),
+    refetchInterval: 5000,
+  })
 
   const { data: vendors = [], isLoading } = useQuery<Vendor[]>({
     queryKey: ['vendors', eventId],
@@ -28,25 +74,29 @@ export default function Vendors() {
     refetchInterval: 5000,
   })
 
-  const createVendor = useMutation({
-    mutationFn: (payload: object) =>
-      api.post(`/events/${eventId}/vendors`, payload).then((r) => r.data),
+  const updateEventBudget = useMutation({
+    mutationFn: (budget_total: number | null) =>
+      api.patch(`/events/${eventId}`, { budget_total }).then((r) => r.data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['vendors', eventId] })
-      setShowForm(false)
-      setName('')
-      setCategory('')
-      setContactName('')
-      setContactEmail('')
-      setContactPhone('')
-      setPrice('')
+      queryClient.invalidateQueries({ queryKey: ['event', eventId] })
+      setEditBudget(false)
     },
   })
 
-  const updateStatus = useMutation({
-    mutationFn: ({ id, status }: { id: number; status: VendorStatus }) =>
-      api.patch(`/events/${eventId}/vendors/${id}`, { status }),
+  const createVendor = useMutation({
+    mutationFn: (payload: object) =>
+      api.post(`/events/${eventId}/vendors`, payload).then((r) => r.data),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['vendors', eventId] }),
+  })
+
+  const updateVendor = useMutation({
+    mutationFn: ({ id, ...data }: { id: number; name?: string; category?: string | null; contact_email?: string | null; contact_phone?: string | null; price?: number | null; actual?: number | null; is_paid?: boolean; status?: VendorStatus }) =>
+      api.patch(`/events/${eventId}/vendors/${id}`, data).then((r) => r.data),
+    onSuccess: (updated: Vendor) => {
+      queryClient.setQueryData(['vendors', eventId], (old: Vendor[] = []) =>
+        old.map((v) => (v.id === updated.id ? updated : v))
+      )
+    },
   })
 
   const deleteVendor = useMutation({
@@ -54,104 +104,86 @@ export default function Vendors() {
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['vendors', eventId] }),
   })
 
-  const totalBooked = vendors
-    .filter((v) => v.status === 'booked' && v.price)
-    .reduce((sum, v) => sum + (v.price ?? 0), 0)
+  const fmt = (n: number) => `₪${Math.round(n).toLocaleString()}`
+  const budgetTotal = event?.budget_total ?? null
+  const totalEstimated = vendors.reduce((s, v) => s + Number(v.price ?? 0), 0)
+  const totalActual = vendors.reduce((s, v) => s + Number(v.actual ?? 0), 0)
+  const remaining = budgetTotal != null ? Number(budgetTotal) - totalActual : null
+  const spentPct = budgetTotal ? Math.min(100, Math.round((totalActual / Number(budgetTotal)) * 100)) : null
 
   return (
     <div>
       <div className="flex items-center gap-3 mb-6">
-        <Link to="/" className="text-gray-400 hover:text-gray-600 text-sm">← Events</Link>
-        <h1 className="text-2xl font-bold text-gray-900">Vendors</h1>
+        <Link to="/" className="text-gray-400 hover:text-gray-600 text-base font-bold">← Events</Link>
+        <h1 className="text-2xl font-bold text-gray-900">Vendors & Budget</h1>
       </div>
 
-      {totalBooked > 0 && (
-        <div className="bg-white border border-gray-200 rounded-xl p-4 mb-6 inline-block">
-          <p className="text-sm text-gray-500">Total booked</p>
-          <p className="text-2xl font-bold text-gray-900">₪{totalBooked.toLocaleString()}</p>
+      {/* Budget overview */}
+      <div className="bg-white border border-gray-200 rounded-xl p-6 mb-6">
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="font-semibold text-gray-800">Overview</h2>
+          {!editBudget && (
+            <button
+              onClick={() => { setEditBudget(true); setBudgetInput(budgetTotal != null ? String(budgetTotal) : '') }}
+              className="text-xs text-burgundy-700 hover:underline"
+            >
+              {budgetTotal != null ? 'Edit budget' : 'Set budget'}
+            </button>
+          )}
         </div>
-      )}
-
-      <div className="flex justify-end mb-4">
-        <button
-          onClick={() => setShowForm(!showForm)}
-          className="bg-burgundy-700 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-burgundy-800"
-        >
-          + Add Vendor
-        </button>
+        {editBudget && (
+          <div className="flex gap-2 mb-4">
+            <input
+              type="number" value={budgetInput}
+              onChange={(e) => setBudgetInput(e.target.value)}
+              placeholder="Total budget" min="0" step="1"
+              className="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-burgundy-500 w-48"
+            />
+            <button
+              onClick={() => updateEventBudget.mutate(budgetInput ? parseFloat(budgetInput) : null)}
+              disabled={updateEventBudget.isPending}
+              className="bg-burgundy-700 text-white px-3 py-2 rounded-lg text-sm font-medium hover:bg-burgundy-800 disabled:opacity-50"
+            >Save</button>
+            <button onClick={() => setEditBudget(false)} className="px-3 py-2 rounded-lg text-sm text-gray-600 hover:bg-gray-100">Cancel</button>
+          </div>
+        )}
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+          <div>
+            <p className="text-base font-bold text-gray-400 mb-1">Total Budget</p>
+            <p className="text-3xl font-bold text-gray-900">{budgetTotal != null ? fmt(Number(budgetTotal)) : '—'}</p>
+          </div>
+          <div>
+            <p className="text-base font-bold text-gray-400 mb-1">Estimated</p>
+            <p className="text-3xl font-bold text-gray-700">{fmt(totalEstimated)}</p>
+          </div>
+          <div>
+            <p className="text-base font-bold text-gray-400 mb-1">Actual Spend</p>
+            <p className="text-3xl font-bold text-gray-700">{fmt(totalActual)}</p>
+          </div>
+          <div>
+            <p className="text-base font-bold text-gray-400 mb-1">Remaining</p>
+            <p className={`text-3xl font-bold ${remaining != null && remaining < 0 ? 'text-red-600' : 'text-green-600'}`}>
+              {remaining != null ? fmt(remaining) : '—'}
+            </p>
+          </div>
+        </div>
+        {spentPct != null && (
+          <div className="mt-4">
+            <div className="flex justify-between text-xs text-gray-400 mb-1">
+              <span>{spentPct}% spent</span>
+            </div>
+            <div className="w-full bg-gray-100 rounded-full h-2">
+              <div
+                className={`h-2 rounded-full transition-all ${spentPct >= 100 ? 'bg-red-500' : spentPct >= 80 ? 'bg-amber-500' : 'bg-burgundy-600'}`}
+                style={{ width: `${spentPct}%` }}
+              />
+            </div>
+          </div>
+        )}
       </div>
-
-      {showForm && (
-        <form
-          onSubmit={(e) => {
-            e.preventDefault()
-            createVendor.mutate({
-              name,
-              category: category || null,
-              contact_name: contactName || null,
-              contact_email: contactEmail || null,
-              contact_phone: contactPhone || null,
-              price: price ? parseFloat(price) : null,
-            })
-          }}
-          className="bg-white border border-gray-200 rounded-xl p-5 mb-6 space-y-4"
-        >
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Vendor Name <span className="text-burgundy-600">*</span>
-              </label>
-              <input value={name} onChange={(e) => setName(e.target.value)} required
-                placeholder="e.g. ABC Photography"
-                className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-burgundy-500" />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Category</label>
-              <input value={category} onChange={(e) => setCategory(e.target.value)}
-                placeholder="e.g. Photography, Catering"
-                className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-burgundy-500" />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Price (₪)</label>
-              <input type="number" value={price} onChange={(e) => setPrice(e.target.value)}
-                placeholder="0" min="0" step="1"
-                className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-burgundy-500" />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Contact Name</label>
-              <input value={contactName} onChange={(e) => setContactName(e.target.value)}
-                className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-burgundy-500" />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Contact Email</label>
-              <input type="email" value={contactEmail} onChange={(e) => setContactEmail(e.target.value)}
-                className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-burgundy-500" />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Contact Phone</label>
-              <input value={contactPhone} onChange={(e) => setContactPhone(e.target.value)}
-                className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-burgundy-500" />
-            </div>
-          </div>
-          <div className="flex gap-2">
-            <button type="submit" disabled={createVendor.isPending}
-              className="bg-burgundy-700 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-burgundy-800 disabled:opacity-50">
-              Add Vendor
-            </button>
-            <button type="button" onClick={() => setShowForm(false)}
-              className="px-4 py-2 rounded-lg text-sm text-gray-600 hover:bg-gray-100">
-              Cancel
-            </button>
-          </div>
-        </form>
-      )}
 
       {isLoading ? (
         <p className="text-gray-500">Loading...</p>
-      ) : vendors.length === 0 ? (
-        <div className="text-center py-16 text-gray-400">
-          <p>No vendors yet. Add your first vendor above.</p>
-        </div>
       ) : (
         <div className="bg-white border border-gray-200 rounded-xl overflow-hidden">
           <table className="w-full text-sm">
@@ -159,26 +191,59 @@ export default function Vendors() {
               <tr>
                 <th className="px-4 py-3 text-left">Vendor</th>
                 <th className="px-4 py-3 text-left">Category</th>
-                <th className="px-4 py-3 text-left">Contact</th>
-                <th className="px-4 py-3 text-left">Price</th>
+                <th className="px-4 py-3 text-left">Email</th>
+                <th className="px-4 py-3 text-left">Phone</th>
+                <th className="px-4 py-3 text-left">Estimated (₪)</th>
+                <th className="px-4 py-3 text-left">Actual (₪)</th>
+                <th className="px-4 py-3 text-center">Paid</th>
                 <th className="px-4 py-3 text-left">Status</th>
                 <th className="px-4 py-3"></th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100">
               {vendors.map((vendor) => (
-                <tr key={vendor.id} className="hover:bg-gray-50">
-                  <td className="px-4 py-3 font-medium text-gray-900">{vendor.name}</td>
-                  <td className="px-4 py-3 text-gray-500">{vendor.category || '—'}</td>
-                  <td className="px-4 py-3 text-gray-500">{vendor.contact_email || vendor.contact_phone || '—'}</td>
-                  <td className="px-4 py-3 text-gray-700">
-                    {vendor.price != null ? `₪${Number(vendor.price).toLocaleString()}` : '—'}
+                <tr key={vendor.id} className={`hover:bg-gray-50 group ${vendor.is_paid ? 'opacity-60' : ''}`}>
+                  <td className="px-4 py-2 min-w-[140px]">
+                    <EditableCell value={vendor.name} bold
+                      onSave={(v) => v && updateVendor.mutate({ id: vendor.id, name: v })} />
                   </td>
-                  <td className="px-4 py-3">
+                  <td className="px-4 py-2 min-w-[110px]">
+                    <EditableCell value={vendor.category} placeholder="category" emptyDisplay="—"
+                      onSave={(v) => updateVendor.mutate({ id: vendor.id, category: v })} />
+                  </td>
+                  <td className="px-4 py-2 min-w-[130px]">
+                    <EditableCell value={vendor.contact_email} placeholder="email" emptyDisplay="—"
+                      onSave={(v) => updateVendor.mutate({ id: vendor.id, contact_email: v })} />
+                  </td>
+                  <td className="px-4 py-2 min-w-[110px]">
+                    <EditableCell value={vendor.contact_phone} placeholder="phone" emptyDisplay="—"
+                      onSave={(v) => updateVendor.mutate({ id: vendor.id, contact_phone: v })} />
+                  </td>
+                  <td className="px-4 py-2 min-w-[90px]">
+                    <EditableCell
+                      value={vendor.price != null ? String(Math.round(Number(vendor.price))) : ''}
+                      type="number" placeholder="0" emptyDisplay="—"
+                      onSave={(v) => updateVendor.mutate({ id: vendor.id, price: v ? parseFloat(v) : null })} />
+                  </td>
+                  <td className="px-4 py-2 min-w-[90px]">
+                    <EditableCell
+                      value={vendor.actual != null ? String(Math.round(Number(vendor.actual))) : ''}
+                      type="number" placeholder="0" emptyDisplay="—"
+                      onSave={(v) => updateVendor.mutate({ id: vendor.id, actual: v ? parseFloat(v) : null })} />
+                  </td>
+                  <td className="px-4 py-2 text-center">
+                    <button
+                      onClick={() => updateVendor.mutate({ id: vendor.id, is_paid: !vendor.is_paid })}
+                      className={`text-xs px-2 py-0.5 rounded-full font-medium transition-colors cursor-pointer ${vendor.is_paid ? 'bg-green-100 text-green-700 hover:bg-green-200' : 'bg-gray-100 text-gray-500 hover:bg-gray-200'}`}
+                    >
+                      {vendor.is_paid ? 'Paid' : 'Unpaid'}
+                    </button>
+                  </td>
+                  <td className="px-4 py-2">
                     <select
                       value={vendor.status}
-                      onChange={(e) => updateStatus.mutate({ id: vendor.id, status: e.target.value as VendorStatus })}
-                      className={`text-xs font-medium px-2 py-1 rounded-full border-0 cursor-pointer ${STATUS_COLORS[vendor.status]}`}
+                      onChange={(e) => updateVendor.mutate({ id: vendor.id, status: e.target.value as VendorStatus })}
+                      className={`text-sm font-medium px-2 py-1 rounded-full border-0 cursor-pointer ${STATUS_COLORS[vendor.status]}`}
                     >
                       <option value="prospect">Prospect</option>
                       <option value="contacted">Contacted</option>
@@ -186,11 +251,12 @@ export default function Vendors() {
                       <option value="cancelled">Cancelled</option>
                     </select>
                   </td>
-                  <td className="px-4 py-3 text-right">
-                    <button onClick={() => deleteVendor.mutate(vendor.id)} className="text-gray-300 hover:text-red-500 text-lg">×</button>
+                  <td className="px-4 py-2 text-right">
+                    <button onClick={() => deleteVendor.mutate(vendor.id)} className="hover:text-red-500 text-lg transition-colors" style={{ color: '#7a6a60' }}>×</button>
                   </td>
                 </tr>
               ))}
+              <AddRow onAdd={(name, category) => createVendor.mutate({ name, category: category || null })} />
             </tbody>
           </table>
         </div>
