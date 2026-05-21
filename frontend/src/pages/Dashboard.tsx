@@ -143,13 +143,13 @@ export default function Dashboard() {
           <p className="text-sm mt-1">Create your first event to get started.</p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="space-y-4">
           {events.map((event) =>
             editingId === event.id ? (
               <form
                 key={event.id}
                 onSubmit={handleUpdate}
-                className="bg-white border border-burgundy-200 rounded-xl p-5 space-y-3"
+                className="bg-white border border-burgundy-200 rounded-2xl p-6 space-y-3"
               >
                 <input
                   value={editTitle}
@@ -158,30 +158,32 @@ export default function Dashboard() {
                   placeholder="Event name"
                   className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-burgundy-500"
                 />
-                <input
-                  type="date"
-                  value={editDate}
-                  onChange={(e) => setEditDate(e.target.value)}
-                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-burgundy-500"
-                />
-                <input
-                  value={editVenue}
-                  onChange={(e) => setEditVenue(e.target.value)}
-                  placeholder="Venue"
-                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-burgundy-500"
-                />
+                <div className="grid grid-cols-2 gap-3">
+                  <input
+                    type="date"
+                    value={editDate}
+                    onChange={(e) => setEditDate(e.target.value)}
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-burgundy-500"
+                  />
+                  <input
+                    value={editVenue}
+                    onChange={(e) => setEditVenue(e.target.value)}
+                    placeholder="Venue"
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-burgundy-500"
+                  />
+                </div>
                 <div className="flex gap-2">
                   <button
                     type="submit"
                     disabled={updateEvent.isPending}
-                    className="flex-1 bg-burgundy-700 text-white px-3 py-1.5 rounded-lg text-sm font-medium hover:bg-burgundy-800 disabled:opacity-50"
+                    className="flex-1 bg-burgundy-700 text-white px-3 py-2 rounded-lg text-sm font-medium hover:bg-burgundy-800 disabled:opacity-50"
                   >
                     Save
                   </button>
                   <button
                     type="button"
                     onClick={() => setEditingId(null)}
-                    className="flex-1 px-3 py-1.5 rounded-lg text-sm text-gray-600 hover:bg-gray-100"
+                    className="flex-1 px-3 py-2 rounded-lg text-sm text-gray-600 hover:bg-gray-100"
                   >
                     Cancel
                   </button>
@@ -190,66 +192,54 @@ export default function Dashboard() {
             ) : (
               <div
                 key={event.id}
-                className="bg-white border border-gray-200 rounded-xl p-5 hover:shadow-md transition-shadow"
+                className="bg-white border border-gray-200 rounded-2xl p-6 hover:shadow-md transition-shadow"
               >
-                <div className="flex justify-between items-start mb-3">
-                  <h2 className="font-semibold text-gray-900 text-lg leading-tight">
-                    {event.title}
-                  </h2>
-                  <div className="flex gap-1 ml-2 shrink-0">
+                <div className="flex justify-between items-start mb-4">
+                  <div>
+                    <h2 className="font-bold text-gray-900 text-2xl leading-tight mb-1">
+                      {event.title}
+                    </h2>
+                    <div className="flex items-center gap-3 text-sm text-gray-500">
+                      {event.date && <span>{new Date(event.date).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</span>}
+                      {event.venue && <span>· {event.venue}</span>}
+                    </div>
+                  </div>
+                  <div className="flex gap-1 ml-4 shrink-0">
                     <button
                       onClick={() => startEdit(event)}
-                      className="text-gray-300 hover:text-burgundy-600 text-sm px-1"
+                      style={{ color: '#7a6a60' }}
+                      className="hover:text-burgundy-600 text-base px-2 py-1 transition-colors"
                       title="Edit event"
                     >
                       ✎
                     </button>
                     <button
                       onClick={() => deleteEvent.mutate(event.id)}
-                      className="text-gray-300 hover:text-red-500 text-lg leading-none"
+                      style={{ color: '#7a6a60' }}
+                      className="hover:text-red-500 text-xl leading-none px-1 transition-colors"
                       title="Delete event"
                     >
                       ×
                     </button>
                   </div>
                 </div>
-                {event.date && (
-                  <p className="text-sm text-gray-500 mb-1">
-                    {new Date(event.date).toLocaleDateString()}
-                  </p>
-                )}
-                {event.venue && <p className="text-sm text-gray-500 mb-4">{event.venue}</p>}
-                <div className="flex gap-2 mt-4 flex-wrap">
-                  <Link
-                    to={`/events/${event.id}/guests`}
-                    className="flex-1 text-center text-xs font-medium text-burgundy-700 border border-burgundy-200 rounded-lg py-1.5 hover:bg-burgundy-50 transition-colors"
-                  >
-                    Guests
-                  </Link>
-                  <Link
-                    to={`/events/${event.id}/tasks`}
-                    className="flex-1 text-center text-xs font-medium text-burgundy-700 border border-burgundy-200 rounded-lg py-1.5 hover:bg-burgundy-50 transition-colors"
-                  >
-                    Tasks
-                  </Link>
-                  <Link
-                    to={`/events/${event.id}/vendors`}
-                    className="flex-1 text-center text-xs font-medium text-burgundy-700 border border-burgundy-200 rounded-lg py-1.5 hover:bg-burgundy-50 transition-colors"
-                  >
-                    Vendors
-                  </Link>
-                  <Link
-                    to={`/events/${event.id}/budget`}
-                    className="flex-1 text-center text-xs font-medium text-burgundy-700 border border-burgundy-200 rounded-lg py-1.5 hover:bg-burgundy-50 transition-colors"
-                  >
-                    Budget
-                  </Link>
-                  <Link
-                    to={`/events/${event.id}/seating`}
-                    className="flex-1 text-center text-xs font-medium text-burgundy-700 border border-burgundy-200 rounded-lg py-1.5 hover:bg-burgundy-50 transition-colors"
-                  >
-                    Seating
-                  </Link>
+                <div className="grid grid-cols-5 gap-3">
+                  {[
+                    { label: 'Guests', path: 'guests', icon: '👥', gray: true, textColor: undefined },
+                    { label: 'Tasks', path: 'tasks', icon: '✓', gray: false, textColor: '#555' },
+                    { label: 'Vendors', path: 'vendors', icon: '🤝🏼', gray: false, textColor: undefined },
+                    { label: 'Budget', path: 'budget', icon: '₪', gray: false, textColor: '#555' },
+                    { label: 'Seating', path: 'seating', icon: '🪑', gray: false, textColor: undefined },
+                  ].map(({ label, path, icon, gray, textColor }) => (
+                    <Link
+                      key={path}
+                      to={`/events/${event.id}/${path}`}
+                      className="flex flex-col items-center gap-2 text-burgundy-700 border border-burgundy-200 rounded-xl py-4 hover:bg-burgundy-50 transition-colors"
+                    >
+                      <span className="text-2xl" style={{ ...(gray ? { filter: 'grayscale(1)' } : {}), ...(textColor ? { color: textColor } : {}) }}>{icon}</span>
+                      <span className="text-sm font-semibold">{label}</span>
+                    </Link>
+                  ))}
                 </div>
               </div>
             )
