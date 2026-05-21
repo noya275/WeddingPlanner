@@ -244,6 +244,12 @@ export default function Dashboard() {
                   >
                     Budget
                   </Link>
+                  <Link
+                    to={`/events/${event.id}/seating`}
+                    className="flex-1 text-center text-xs font-medium text-burgundy-700 border border-burgundy-200 rounded-lg py-1.5 hover:bg-burgundy-50 transition-colors"
+                  >
+                    Seating
+                  </Link>
                 </div>
               </div>
             )
