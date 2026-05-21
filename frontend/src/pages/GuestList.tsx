@@ -25,6 +25,7 @@ type GuestPatch = { id: number; name?: string; phone?: string | null; plus_one?:
 function AddRow({ onAdd }: { onAdd: (name: string, phone: string) => void }) {
   const [name, setName] = useState('')
   const [phone, setPhone] = useState('')
+  const nameRef = useRef<HTMLInputElement>(null)
   const phoneRef = useRef<HTMLInputElement>(null)
 
   function submit() {
@@ -32,17 +33,18 @@ function AddRow({ onAdd }: { onAdd: (name: string, phone: string) => void }) {
     onAdd(name.trim(), phone.trim())
     setName('')
     setPhone('')
+    setTimeout(() => nameRef.current?.focus(), 0)
   }
 
   return (
     <tr className="border-t border-dashed border-gray-200">
       <td className="px-3 py-2" colSpan={1}>
         <input
+          ref={nameRef}
           value={name}
           onChange={(e) => setName(e.target.value)}
           onKeyDown={(e) => {
             if (e.key === 'Enter') { e.preventDefault(); phoneRef.current?.focus() }
-            if (e.key === 'Tab') phoneRef.current?.focus()
           }}
           placeholder="+ Add guest..."
           className="w-full text-sm outline-none bg-transparent guest-add-input text-gray-700"
