@@ -17,7 +17,7 @@ export default function Layout() {
       style={{ backgroundImage: 'url(/RedBG.webp)', backgroundSize: 'cover', backgroundPosition: 'center', backgroundAttachment: 'fixed' }}
     >
       <nav style={{ backgroundColor: 'rgba(80, 30, 40, 0.55)', backdropFilter: 'blur(10px)', borderBottom: '1px solid rgba(180,120,100,0.3)' }}>
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-10">
           <div className="flex justify-between items-center h-16">
             <Link to="/" className="text-xl font-semibold tracking-tight text-amber-100" style={{ fontFamily: 'Georgia, "Times New Roman", serif' }}>
               Wedding Planner
@@ -31,7 +31,7 @@ export default function Layout() {
           </div>
         </div>
       </nav>
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8" style={{ fontFamily: "'Cormorant Garamond', Georgia, serif", fontWeight: 700, fontSize: '1.2rem' }}>
+      <main className="max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-10 py-8" style={{ fontFamily: "'Cormorant Garamond', Georgia, serif", fontWeight: 700, fontSize: '1.2rem' }}>
         <PageTransition key={location.pathname}>
           <Outlet />
         </PageTransition>

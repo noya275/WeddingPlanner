@@ -1,5 +1,5 @@
 import { useState, useRef } from 'react'
-import { useParams, Link } from 'react-router-dom'
+import { useParams } from 'react-router-dom'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import api from '../api/client'
 import type { Vendor, VendorStatus, Event } from '../api/types'
@@ -8,8 +8,8 @@ import EditableCell from '../components/EditableCell'
 const STATUS_COLORS: Record<VendorStatus, string> = {
   prospect: 'bg-gray-100 text-gray-600',
   contacted: 'bg-blue-100 text-blue-600',
-  booked: 'bg-green-100 text-green-600',
-  cancelled: 'bg-red-100 text-red-600',
+  booked: 'bg-green-100 text-[#2d7a4a]',
+  cancelled: 'bg-red-100 text-red-700',
 }
 
 function AddRow({ onAdd }: { onAdd: (name: string, category: string) => void }) {
@@ -113,8 +113,7 @@ export default function Vendors() {
 
   return (
     <div>
-      <div className="flex items-center gap-3 mb-6">
-        <Link to="/" className="text-gray-400 hover:text-gray-600 text-base font-bold">← Events</Link>
+      <div className="mb-6">
         <h1 className="text-2xl font-bold text-gray-900">Vendors & Budget</h1>
       </div>
 
@@ -234,7 +233,7 @@ export default function Vendors() {
                   <td className="px-4 py-2 text-center">
                     <button
                       onClick={() => updateVendor.mutate({ id: vendor.id, is_paid: !vendor.is_paid })}
-                      className={`text-xs px-2 py-0.5 rounded-full font-medium transition-colors cursor-pointer ${vendor.is_paid ? 'bg-green-100 text-green-700 hover:bg-green-200' : 'bg-gray-100 text-gray-500 hover:bg-gray-200'}`}
+                      className={`text-xs px-2 py-0.5 rounded-full font-medium transition-colors cursor-pointer ${vendor.is_paid ? 'bg-green-100 text-[#2d7a4a] hover:bg-green-200' : 'bg-gray-100 text-gray-500 hover:bg-gray-200'}`}
                     >
                       {vendor.is_paid ? 'Paid' : 'Unpaid'}
                     </button>

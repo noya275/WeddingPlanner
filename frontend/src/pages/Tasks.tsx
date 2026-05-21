@@ -1,9 +1,8 @@
 import { useState } from 'react'
-import { useParams, Link } from 'react-router-dom'
+import { useParams } from 'react-router-dom'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import api from '../api/client'
 import type { Task, TaskStatus } from '../api/types'
-import EditableCell from '../components/EditableCell'
 
 const COLUMNS: { status: TaskStatus; label: string; dot: string }[] = [
   { status: 'todo', label: 'To Do', dot: 'bg-gray-400' },
@@ -13,16 +12,33 @@ const COLUMNS: { status: TaskStatus; label: string; dot: string }[] = [
 
 const STATUS_ORDER: TaskStatus[] = ['todo', 'in_progress', 'done']
 
+function AddTaskRow({ onAdd }: { onAdd: (title: string) => void }) {
+  const [value, setValue] = useState('')
+
+  function submit() {
+    if (!value.trim()) return
+    onAdd(value.trim())
+    setValue('')
+  }
+
+  return (
+    <div className="pt-2 border-t border-dashed border-gray-200 mt-2">
+      <input
+        value={value}
+        onChange={(e) => setValue(e.target.value)}
+        onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); submit() } }}
+        onBlur={submit}
+        placeholder="+ Add task..."
+        className="w-full text-sm outline-none bg-transparent text-gray-700 guest-add-input px-1 py-1"
+      />
+    </div>
+  )
+}
+
 export default function Tasks() {
   const { eventId } = useParams<{ eventId: string }>()
   const queryClient = useQueryClient()
-  const [showForm, setShowForm] = useState(false)
-  const [title, setTitle] = useState('')
-  const [assignedTo, setAssignedTo] = useState('')
-  const [dueDate, setDueDate] = useState('')
-  const [category, setCategory] = useState('')
-
-  const { data: tasks = [], isLoading } = useQuery<Task[]>({
+const { data: tasks = [], isLoading } = useQuery<Task[]>({
     queryKey: ['tasks', eventId],
     queryFn: () => api.get(`/events/${eventId}/tasks`).then((r) => r.data),
     refetchInterval: 5000,
@@ -31,14 +47,7 @@ export default function Tasks() {
   const createTask = useMutation({
     mutationFn: (payload: object) =>
       api.post(`/events/${eventId}/tasks`, payload).then((r) => r.data),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['tasks', eventId] })
-      setShowForm(false)
-      setTitle('')
-      setAssignedTo('')
-      setDueDate('')
-      setCategory('')
-    },
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['tasks', eventId] }),
   })
 
   const updateStatus = useMutation({
@@ -70,94 +79,9 @@ export default function Tasks() {
 
   return (
     <div>
-      <div className="flex items-center gap-3 mb-6">
-        <Link to="/" className="text-gray-400 hover:text-gray-600 text-base font-bold">
-          ← Events
-        </Link>
+      <div className="mb-6">
         <h1 className="text-2xl font-bold text-gray-900">Tasks</h1>
       </div>
-
-      <div className="flex justify-end mb-4">
-        <button
-          onClick={() => setShowForm(!showForm)}
-          className="bg-burgundy-700 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-burgundy-800"
-        >
-          + Add Task
-        </button>
-      </div>
-
-      {showForm && (
-        <form
-          onSubmit={(e) => {
-            e.preventDefault()
-            createTask.mutate({
-              title,
-              assigned_to: assignedTo || null,
-              due_date: dueDate || null,
-              category: category || null,
-            })
-          }}
-          className="bg-white border border-gray-200 rounded-xl p-5 mb-6 space-y-4"
-        >
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Task <span className="text-burgundy-600">*</span>
-              </label>
-              <input
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
-                required
-                placeholder="e.g. Book photographer"
-                className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-burgundy-500"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Assigned to</label>
-              <input
-                value={assignedTo}
-                onChange={(e) => setAssignedTo(e.target.value)}
-                placeholder="e.g. Sarah"
-                className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-burgundy-500"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Due date</label>
-              <input
-                type="date"
-                value={dueDate}
-                onChange={(e) => setDueDate(e.target.value)}
-                className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-burgundy-500"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Category</label>
-              <input
-                value={category}
-                onChange={(e) => setCategory(e.target.value)}
-                placeholder="e.g. Photography"
-                className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-burgundy-500"
-              />
-            </div>
-          </div>
-          <div className="flex gap-2">
-            <button
-              type="submit"
-              disabled={createTask.isPending}
-              className="bg-burgundy-700 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-burgundy-800 disabled:opacity-50"
-            >
-              Add Task
-            </button>
-            <button
-              type="button"
-              onClick={() => setShowForm(false)}
-              className="px-4 py-2 rounded-lg text-sm text-gray-600 hover:bg-gray-100"
-            >
-              Cancel
-            </button>
-          </div>
-        </form>
-      )}
 
       {isLoading ? (
         <p className="text-gray-500">Loading...</p>
@@ -178,45 +102,21 @@ export default function Tasks() {
                       key={task.id}
                       className="border border-gray-100 rounded-lg p-3 hover:border-gray-200 transition-colors group"
                     >
-                      <div className="flex justify-between items-start mb-1">
-                        <div className="flex-1 mr-1">
-                          <EditableCell
-                            value={task.title}
-                            bold
-                            onSave={(v) => v && updateTask.mutate({ id: task.id, title: v })}
-                          />
-                        </div>
+                      <div className="flex justify-between items-start gap-1">
+                        <textarea
+                          key={task.id}
+                          defaultValue={task.title}
+                          onBlur={(e) => { const v = e.target.value.trim(); if (v && v !== task.title) updateTask.mutate({ id: task.id, title: v }) }}
+                          rows={3}
+                          className="flex-1 resize-none bg-transparent outline-none font-medium text-gray-900 placeholder-gray-300 w-full"
+                        />
                         <button
                           onClick={() => deleteTask.mutate(task.id)}
-                          className="text-gray-200 hover:text-red-500 text-base shrink-0 opacity-0 group-hover:opacity-100 transition-opacity"
+                          className="hover:text-red-500 text-base shrink-0 opacity-0 group-hover:opacity-100 transition-opacity mt-0.5"
+                          style={{ color: '#7a6a60' }}
                         >
                           ×
                         </button>
-                      </div>
-                      <div className="text-xs">
-                        <EditableCell
-                          value={task.assigned_to}
-                          placeholder="assign to…"
-                          emptyDisplay=""
-                          onSave={(v) => updateTask.mutate({ id: task.id, assigned_to: v })}
-                        />
-                      </div>
-                      <div className="text-xs">
-                        <EditableCell
-                          value={task.due_date}
-                          type="date"
-                          placeholder="due date"
-                          emptyDisplay=""
-                          onSave={(v) => updateTask.mutate({ id: task.id, due_date: v })}
-                        />
-                      </div>
-                      <div className="text-xs">
-                        <EditableCell
-                          value={task.category}
-                          placeholder="category"
-                          emptyDisplay=""
-                          onSave={(v) => updateTask.mutate({ id: task.id, category: v })}
-                        />
                       </div>
                       <div className="flex gap-1 mt-2">
                         {colIdx > 0 && (
@@ -240,9 +140,7 @@ export default function Tasks() {
                       </div>
                     </div>
                   ))}
-                  {columnTasks.length === 0 && (
-                    <p className="text-xs text-gray-300 text-center py-4">Empty</p>
-                  )}
+                  <AddTaskRow onAdd={(title) => createTask.mutate({ title, status })} />
                 </div>
               </div>
             )

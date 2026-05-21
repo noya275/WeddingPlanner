@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useParams, Link } from 'react-router-dom'
+import { useParams } from 'react-router-dom'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import {
   DndContext, DragOverlay, PointerSensor, useSensor, useSensors,
@@ -192,7 +192,6 @@ export default function SeatingChart() {
   return (
     <div>
       <div className="flex items-center gap-3 mb-6">
-        <Link to="/" className="text-gray-400 hover:text-gray-600 text-base font-bold">← Events</Link>
         <h1 className="text-2xl font-bold text-gray-900">Seating Chart</h1>
         <div className="ml-auto flex items-center gap-4 text-sm">
           <label className="flex items-center gap-2 text-gray-600">

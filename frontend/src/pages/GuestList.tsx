@@ -98,7 +98,9 @@ function SideTable({ title, emoji, guests, onUpdate, onDelete, onSendRSVP, onAdd
           {guests.map((guest) => (
             <tr key={guest.id} className="hover:bg-gray-50 group">
               <td className="px-3 py-2 font-medium text-gray-900 min-w-[120px]">
-                <EditableCell value={guest.name} bold onSave={(v) => v && onUpdate({ id: guest.id, name: v })} />
+                <div style={{ fontWeight: 400 }}>
+                  <EditableCell value={guest.name} bold onSave={(v) => v && onUpdate({ id: guest.id, name: v })} />
+                </div>
               </td>
               <td className="px-3 py-2 min-w-[120px]">
                 <EditableCell
@@ -250,8 +252,7 @@ export default function GuestList() {
 
   return (
     <div>
-      <div className="flex items-center gap-3 mb-6">
-        <Link to="/" className="text-gray-400 hover:text-gray-600 text-base font-bold">← Events</Link>
+      <div className="mb-6">
         <h1 className="text-2xl font-bold text-gray-900">Guest List</h1>
       </div>
 

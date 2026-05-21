@@ -56,7 +56,7 @@ export default function EditableCell({ value, onSave, type = 'text', placeholder
     <span
       onClick={() => setEditing(true)}
       title="Click to edit"
-      className={`block w-full cursor-text rounded px-2 py-0.5 -mx-2 hover:bg-burgundy-50 transition-colors text-sm ${bold ? 'font-medium text-gray-900' : 'text-gray-600'} ${isEmpty ? 'text-gray-300 italic' : ''}`}
+      className={`block w-full cursor-text rounded px-2 py-0.5 -mx-2 hover:bg-burgundy-50 transition-colors ${bold ? 'font-medium text-gray-900' : 'text-gray-600'} ${isEmpty ? 'text-gray-400 italic' : ''}`}
     >
       {isEmpty ? emptyDisplay : String(value)}
     </span>

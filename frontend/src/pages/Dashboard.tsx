@@ -194,17 +194,17 @@ export default function Dashboard() {
                 key={event.id}
                 className="bg-white border border-gray-200 rounded-2xl p-6 hover:shadow-md transition-shadow"
               >
-                <div className="flex justify-between items-start mb-4">
-                  <div>
-                    <h2 className="font-bold text-gray-900 text-2xl leading-tight mb-1">
+                <div className="flex justify-between items-center">
+                  <Link to={`/events/${event.id}/guests`} className="flex-1 min-w-0 mr-4">
+                    <h2 className="font-bold text-gray-900 text-2xl leading-tight mb-1 hover:text-burgundy-700 transition-colors">
                       {event.title}
                     </h2>
                     <div className="flex items-center gap-3 text-sm text-gray-500">
                       {event.date && <span>{new Date(event.date).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</span>}
                       {event.venue && <span>· {event.venue}</span>}
                     </div>
-                  </div>
-                  <div className="flex gap-1 ml-4 shrink-0">
+                  </Link>
+                  <div className="flex gap-1 shrink-0">
                     <button
                       onClick={() => startEdit(event)}
                       style={{ color: '#7a6a60' }}
@@ -222,23 +222,6 @@ export default function Dashboard() {
                       ×
                     </button>
                   </div>
-                </div>
-                <div className="grid grid-cols-4 gap-3">
-                  {[
-                    { label: 'Guests', path: 'guests', icon: '👥', gray: true, textColor: undefined },
-                    { label: 'Tasks', path: 'tasks', icon: '✓', gray: false, textColor: '#555' },
-                    { label: 'Vendors & Budget', path: 'vendors', icon: '🤝🏼', gray: false, textColor: undefined },
-                    { label: 'Seating', path: 'seating', icon: '🪑', gray: false, textColor: undefined },
-                  ].map(({ label, path, icon, gray, textColor }) => (
-                    <Link
-                      key={path}
-                      to={`/events/${event.id}/${path}`}
-                      className="flex flex-col items-center gap-2 text-burgundy-700 border border-burgundy-200 rounded-xl py-4 hover:bg-burgundy-50 transition-colors"
-                    >
-                      <span className="text-2xl" style={{ ...(gray ? { filter: 'grayscale(1)' } : {}), ...(textColor ? { color: textColor } : {}) }}>{icon}</span>
-                      <span className="text-sm font-semibold">{label}</span>
-                    </Link>
-                  ))}
                 </div>
               </div>
             )

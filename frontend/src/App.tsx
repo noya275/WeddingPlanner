@@ -9,6 +9,7 @@ import Vendors from './pages/Vendors'
 import RSVPPage from './pages/RSVP'
 import SeatingChart from './pages/SeatingChart'
 import Layout from './components/Layout'
+import EventLayout from './components/EventLayout'
 import { getToken } from './api/client'
 
 const queryClient = new QueryClient()
@@ -34,10 +35,13 @@ export default function App() {
             }
           >
             <Route index element={<Dashboard />} />
-            <Route path="events/:eventId/guests" element={<GuestList />} />
-            <Route path="events/:eventId/tasks" element={<Tasks />} />
-            <Route path="events/:eventId/vendors" element={<Vendors />} />
-            <Route path="events/:eventId/seating" element={<SeatingChart />} />
+            <Route path="events/:eventId" element={<EventLayout />}>
+              <Route index element={<Navigate to="guests" replace />} />
+              <Route path="guests" element={<GuestList />} />
+              <Route path="tasks" element={<Tasks />} />
+              <Route path="vendors" element={<Vendors />} />
+              <Route path="seating" element={<SeatingChart />} />
+            </Route>
           </Route>
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
