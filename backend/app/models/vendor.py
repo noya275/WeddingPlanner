@@ -5,6 +5,7 @@ from ..database import Base
 
 
 class VendorStatus(str, enum.Enum):
+    """Booking lifecycle stages for a vendor."""
     prospect = "prospect"
     contacted = "contacted"
     booked = "booked"
@@ -12,6 +13,7 @@ class VendorStatus(str, enum.Enum):
 
 
 class Vendor(Base):
+    """A service provider (photographer, caterer, etc.) attached to an event."""
     __tablename__ = "vendors"
 
     id = Column(Integer, primary_key=True, index=True)

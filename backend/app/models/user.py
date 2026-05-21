@@ -5,6 +5,7 @@ from ..database import Base
 
 
 class User(Base):
+    """Registered user account. One user can own many events."""
     __tablename__ = "users"
 
     id = Column(Integer, primary_key=True, index=True)

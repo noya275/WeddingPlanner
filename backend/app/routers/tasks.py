@@ -11,6 +11,7 @@ router = APIRouter(tags=["tasks"])
 
 
 def get_task_or_404(task_id: int, event_id: int, db: Session) -> Task:
+    """Fetch a task belonging to the given event, or raise 404."""
     task = db.query(Task).filter(Task.id == task_id, Task.event_id == event_id).first()
     if not task:
         raise HTTPException(status_code=404, detail="Task not found")

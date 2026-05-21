@@ -6,10 +6,12 @@ from ..database import Base
 
 
 def _gen_token() -> str:
+    """Generate a unique, unguessable token for RSVP links."""
     return secrets.token_urlsafe(16)
 
 
 class RSVPStatus(str, enum.Enum):
+    """Allowed RSVP states. String enum so values serialize naturally to/from JSON."""
     pending = "pending"
     confirmed = "confirmed"
     declined = "declined"
@@ -17,6 +19,7 @@ class RSVPStatus(str, enum.Enum):
 
 
 class Guest(Base):
+    """A guest invited to an event. Holds RSVP state, seating, and dietary info."""
     __tablename__ = "guests"
 
     id = Column(Integer, primary_key=True, index=True)

@@ -15,6 +15,7 @@ def list_events(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
+    """Return all events belonging to the authenticated user."""
     return db.query(Event).filter(Event.user_id == current_user.id).all()
 
 
@@ -24,6 +25,7 @@ def create_event(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
+    """Create a new event owned by the authenticated user."""
     event = Event(**data.model_dump(), user_id=current_user.id)
     db.add(event)
     db.commit()
@@ -47,6 +49,7 @@ def update_event(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
+    """Partially update an event. Only fields included in the request body are changed."""
     event = get_event_or_404(event_id, current_user.id, db)
     for field, value in data.model_dump(exclude_unset=True).items():
         setattr(event, field, value)
@@ -61,6 +64,7 @@ def delete_event(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
+    """Delete an event and all its guests, tasks, and vendors (cascade)."""
     event = get_event_or_404(event_id, current_user.id, db)
     db.delete(event)
     db.commit()

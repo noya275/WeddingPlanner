@@ -12,6 +12,7 @@ router = APIRouter(tags=["guests"])
 
 
 def get_guest_or_404(guest_id: int, event_id: int, db: Session) -> Guest:
+    """Fetch a guest belonging to the given event, or raise 404."""
     guest = db.query(Guest).filter(Guest.id == guest_id, Guest.event_id == event_id).first()
     if not guest:
         raise HTTPException(status_code=404, detail="Guest not found")
@@ -78,6 +79,7 @@ def ensure_rsvp_token(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
+    """Generate a unique RSVP token for the guest if one doesn't already exist."""
     get_event_or_404(event_id, current_user.id, db)
     guest = get_guest_or_404(guest_id, event_id, db)
     if not guest.rsvp_token:

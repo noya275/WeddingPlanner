@@ -11,6 +11,7 @@ router = APIRouter(tags=["vendors"])
 
 
 def get_vendor_or_404(vendor_id: int, event_id: int, db: Session) -> Vendor:
+    """Fetch a vendor belonging to the given event, or raise 404."""
     vendor = db.query(Vendor).filter(Vendor.id == vendor_id, Vendor.event_id == event_id).first()
     if not vendor:
         raise HTTPException(status_code=404, detail="Vendor not found")

@@ -5,6 +5,7 @@ from ..database import Base
 
 
 class Event(Base):
+    """A wedding or celebration event. Owns guests, tasks, and vendors."""
     __tablename__ = "events"
 
     id = Column(Integer, primary_key=True, index=True)

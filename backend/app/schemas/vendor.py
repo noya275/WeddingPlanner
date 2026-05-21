@@ -1,3 +1,4 @@
+"""Pydantic schemas for the /vendors API."""
 from pydantic import BaseModel
 from typing import Optional
 from decimal import Decimal
@@ -31,6 +32,7 @@ class VendorUpdate(BaseModel):
 
 
 class VendorOut(VendorCreate):
+    """Extends VendorCreate with server-assigned fields returned after creation."""
     id: int
     event_id: int
 
