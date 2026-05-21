@@ -50,14 +50,8 @@ const { data: tasks = [], isLoading } = useQuery<Task[]>({
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['tasks', eventId] }),
   })
 
-  const updateStatus = useMutation({
-    mutationFn: ({ id, status }: { id: number; status: TaskStatus }) =>
-      api.patch(`/events/${eventId}/tasks/${id}`, { status }),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['tasks', eventId] }),
-  })
-
   const updateTask = useMutation({
-    mutationFn: ({ id, ...data }: { id: number; title?: string; assigned_to?: string | null; due_date?: string | null; category?: string | null }) =>
+    mutationFn: ({ id, ...data }: { id: number; title?: string; status?: TaskStatus; assigned_to?: string | null; due_date?: string | null; category?: string | null }) =>
       api.patch(`/events/${eventId}/tasks/${id}`, data).then((r) => r.data),
     onSuccess: (updated: Task) => {
       queryClient.setQueryData(['tasks', eventId], (old: Task[] = []) =>
@@ -74,7 +68,7 @@ const { data: tasks = [], isLoading } = useQuery<Task[]>({
   function moveTask(task: Task, direction: -1 | 1) {
     const idx = STATUS_ORDER.indexOf(task.status)
     const next = STATUS_ORDER[idx + direction]
-    if (next) updateStatus.mutate({ id: task.id, status: next })
+    if (next) updateTask.mutate({ id: task.id, status: next })
   }
 
   return (

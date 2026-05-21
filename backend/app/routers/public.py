@@ -1,9 +1,15 @@
 from fastapi import APIRouter, Depends, HTTPException
+from pydantic import BaseModel
+from typing import Literal
 from sqlalchemy.orm import Session
 from ..database import get_db
 from ..models.guest import Guest, RSVPStatus
 
 router = APIRouter(prefix="/public", tags=["public"])
+
+
+class RSVPSubmit(BaseModel):
+    status: Literal["confirmed", "declined", "maybe"]
 
 
 @router.get("/rsvp/{token}")
@@ -20,13 +26,10 @@ def get_rsvp(token: str, db: Session = Depends(get_db)):
 
 
 @router.post("/rsvp/{token}")
-def submit_rsvp(token: str, body: dict, db: Session = Depends(get_db)):
+def submit_rsvp(token: str, body: RSVPSubmit, db: Session = Depends(get_db)):
     guest = db.query(Guest).filter(Guest.rsvp_token == token).first()
     if not guest:
         raise HTTPException(status_code=404, detail="Invalid RSVP link")
-    status = body.get("status")
-    if status not in ("confirmed", "declined", "maybe"):
-        raise HTTPException(status_code=400, detail="Status must be confirmed, declined, or maybe")
-    guest.rsvp_status = RSVPStatus(status)
+    guest.rsvp_status = RSVPStatus(body.status)
     db.commit()
-    return {"ok": True, "status": status}
+    return {"ok": True, "status": body.status}
