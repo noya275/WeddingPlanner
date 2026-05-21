@@ -10,10 +10,15 @@ import type { DragEndEvent, DragStartEvent } from '@dnd-kit/core'
 import api from '../api/client'
 import type { Guest } from '../api/types'
 
-function DraggableGuest({ guest, small = false }: { guest: Guest; small?: boolean }) {
+const TABLE_SIZE = 200   // circle diameter
+const CONTAINER = 360    // total space per table (for names outside)
+const SEAT_RING = 115    // distance from center to seat center
+const NAME_OFFSET = 24   // extra distance beyond seat for name label
+
+function DraggableGuest({ guest }: { guest: Guest }) {
   const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({ id: guest.id })
   const style = transform
-    ? { transform: `translate(${transform.x}px, ${transform.y}px)`, zIndex: 50 }
+    ? { transform: `translate(${transform.x}px, ${transform.y}px)`, zIndex: 50, position: 'relative' as const }
     : undefined
 
   return (
@@ -22,44 +27,100 @@ function DraggableGuest({ guest, small = false }: { guest: Guest; small?: boolea
       style={style}
       {...listeners}
       {...attributes}
-      className={`select-none cursor-grab active:cursor-grabbing rounded-lg px-2 py-1 text-xs font-medium border transition-opacity
-        ${isDragging ? 'opacity-0' : 'opacity-100'}
-        ${small
-          ? 'bg-white/70 border-gray-200 text-gray-700'
-          : 'bg-white border-gray-200 text-gray-800 shadow-sm'
-        }`}
+      className={`select-none cursor-grab active:cursor-grabbing rounded-lg px-2 py-1 text-xs font-medium border bg-white shadow-sm text-gray-800 transition-opacity
+        ${isDragging ? 'opacity-0' : 'opacity-100'}`}
     >
       {guest.name}
     </div>
   )
 }
 
-function TableZone({ tableNum, guests, capacity }: { tableNum: number; guests: Guest[]; capacity: number }) {
-  const { setNodeRef, isOver } = useDroppable({ id: `table-${tableNum}` })
-  const filled = guests.length
-  const pct = Math.min(filled / capacity, 1)
-  const ringColor = pct === 1 ? 'border-red-400' : isOver ? 'border-burgundy-500' : 'border-gray-300'
+function SeatPosition({ guest, angle, isDragging }: { guest: Guest | null; angle: number; isDragging: boolean }) {
+  const cx = CONTAINER / 2
+  const cy = CONTAINER / 2
+  const sx = cx + Math.cos(angle) * SEAT_RING
+  const sy = cy + Math.sin(angle) * SEAT_RING
+  const nx = cx + Math.cos(angle) * (SEAT_RING + NAME_OFFSET)
+  const ny = cy + Math.sin(angle) * (SEAT_RING + NAME_OFFSET)
+
+  const { attributes, listeners, setNodeRef, transform, isDragging: thisDragging } = useDraggable({
+    id: guest?.id ?? `empty-${angle}`,
+    disabled: !guest,
+  })
 
   return (
-    <div
-      ref={setNodeRef}
-      className={`relative flex flex-col items-center justify-center rounded-full border-4 transition-colors bg-white/60 backdrop-blur-sm
-        ${ringColor}`}
-      style={{ width: 140, height: 140 }}
-    >
-      <p className="text-xs font-bold text-gray-500 mb-1">Table {tableNum}</p>
-      <p className="text-xs text-gray-400">{filled}/{capacity}</p>
-      <div className="flex flex-wrap justify-center gap-1 mt-1 px-3 max-w-[120px]">
-        {guests.slice(0, 6).map((g) => (
-          <DraggableGuest key={g.id} guest={g} small />
-        ))}
-        {guests.length > 6 && (
-          <span className="text-[10px] text-gray-400">+{guests.length - 6}</span>
+    <>
+      {/* Seat dot */}
+      <div
+        style={{ position: 'absolute', left: sx - 10, top: sy - 10, width: 20, height: 20 }}
+        className={`rounded-full border-2 ${guest ? 'bg-burgundy-100 border-burgundy-400' : 'bg-gray-100 border-gray-200'}`}
+      />
+      {/* Guest name label */}
+      {guest && (
+        <div
+          ref={setNodeRef}
+          style={{
+            position: 'absolute',
+            left: nx,
+            top: ny,
+            transform: `translate(-50%, -50%)${transform ? ` translate(${transform.x}px, ${transform.y}px)` : ''}`,
+            zIndex: thisDragging ? 50 : 1,
+            opacity: thisDragging || isDragging ? 0 : 1,
+            whiteSpace: 'nowrap',
+          }}
+          {...listeners}
+          {...attributes}
+          className="cursor-grab active:cursor-grabbing select-none text-xs font-medium bg-white/90 border border-gray-200 rounded px-1.5 py-0.5 text-gray-700 shadow-sm"
+        >
+          {guest.name}
+        </div>
+      )}
+    </>
+  )
+}
+
+function TableZone({ tableNum, guests, capacity }: { tableNum: number; guests: Guest[]; capacity: number }) {
+  const { setNodeRef, isOver } = useDroppable({ id: `table-${tableNum}` })
+  const cx = CONTAINER / 2
+  const cy = CONTAINER / 2
+  const filled = guests.length
+  const slots = Math.max(capacity, filled)
+
+  return (
+    <div style={{ width: CONTAINER, height: CONTAINER, position: 'relative', flexShrink: 0 }}>
+      {/* Table circle — drop zone */}
+      <div
+        ref={setNodeRef}
+        style={{
+          position: 'absolute',
+          left: cx - TABLE_SIZE / 2,
+          top: cy - TABLE_SIZE / 2,
+          width: TABLE_SIZE,
+          height: TABLE_SIZE,
+          borderRadius: '50%',
+        }}
+        className={`border-4 bg-white/60 backdrop-blur-sm transition-colors flex flex-col items-center justify-center
+          ${guests.length >= capacity ? 'border-red-300' : isOver ? 'border-burgundy-500' : 'border-gray-300'}`}
+      >
+        <p className="text-sm font-bold text-gray-600">Table {tableNum}</p>
+        <p className="text-xs text-gray-400">{filled}/{capacity}</p>
+        {isOver && (
+          <div className="absolute inset-0 rounded-full bg-burgundy-50/40 pointer-events-none" />
         )}
       </div>
-      {isOver && (
-        <div className="absolute inset-0 rounded-full bg-burgundy-100/40 border-2 border-dashed border-burgundy-400 pointer-events-none" />
-      )}
+
+      {/* Seats around the table */}
+      {Array.from({ length: slots }, (_, i) => {
+        const angle = (i / slots) * 2 * Math.PI - Math.PI / 2
+        return (
+          <SeatPosition
+            key={i}
+            angle={angle}
+            guest={guests[i] ?? null}
+            isDragging={false}
+          />
+        )
+      })}
     </div>
   )
 }
@@ -69,17 +130,13 @@ function UnassignedZone({ guests }: { guests: Guest[] }) {
   return (
     <div
       ref={setNodeRef}
-      className={`bg-white/60 backdrop-blur-sm rounded-xl border-2 transition-colors p-3 min-h-[120px]
+      className={`bg-white/60 backdrop-blur-sm rounded-xl border-2 transition-colors p-3 min-h-[80px]
         ${isOver ? 'border-burgundy-400 border-dashed' : 'border-gray-200'}`}
     >
       <p className="text-xs font-semibold text-gray-500 mb-2 uppercase tracking-wide">Unassigned ({guests.length})</p>
       <div className="flex flex-wrap gap-1.5">
-        {guests.map((g) => (
-          <DraggableGuest key={g.id} guest={g} />
-        ))}
-        {guests.length === 0 && (
-          <p className="text-xs text-gray-300 italic">All guests seated!</p>
-        )}
+        {guests.map((g) => <DraggableGuest key={g.id} guest={g} />)}
+        {guests.length === 0 && <p className="text-xs text-gray-300 italic">All guests seated!</p>}
       </div>
     </div>
   )
@@ -120,13 +177,12 @@ export default function SeatingChart() {
     const { active, over } = event
     if (!over) return
     const guestId = active.id as number
+    if (isNaN(guestId)) return
     if (over.id === 'unassigned') {
       updateGuest.mutate({ id: guestId, table_number: null })
     } else {
       const tableNum = parseInt(String(over.id).replace('table-', ''))
-      if (!isNaN(tableNum)) {
-        updateGuest.mutate({ id: guestId, table_number: tableNum })
-      }
+      if (!isNaN(tableNum)) updateGuest.mutate({ id: guestId, table_number: tableNum })
     }
   }
 
@@ -155,11 +211,11 @@ export default function SeatingChart() {
       </div>
 
       <DndContext sensors={sensors} modifiers={[snapCenterToCursor]} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
-        <div className="mb-6">
+        <div className="mb-8">
           <UnassignedZone guests={unassigned} />
         </div>
 
-        <div className="flex flex-wrap gap-8 justify-center">
+        <div className="flex flex-wrap gap-4 justify-center">
           {tables.map((n) => (
             <TableZone
               key={n}
