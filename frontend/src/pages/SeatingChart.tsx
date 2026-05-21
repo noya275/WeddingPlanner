@@ -146,7 +146,7 @@ function UnassignedZone({ guests }: { guests: Guest[] }) {
       <div className="flex flex-wrap gap-2">
         {guests.map((g) => <DraggableGuest key={g.id} guest={g} />)}
         {guests.length === 0 && (
-          <p className="text-sm text-gray-300 italic">All guests are seated 🎉</p>
+          <p className="text-sm italic" style={{ color: '#aba098' }}>All guests are seated 🎉</p>
         )}
       </div>
     </div>
