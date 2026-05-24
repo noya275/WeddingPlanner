@@ -1,6 +1,21 @@
 import { useState, useRef, Fragment } from 'react'
 import { useParams } from 'react-router-dom'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import {
+  DndContext,
+  closestCenter,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  DragEndEvent,
+} from '@dnd-kit/core'
+import {
+  SortableContext,
+  useSortable,
+  verticalListSortingStrategy,
+  arrayMove,
+} from '@dnd-kit/sortable'
+import { CSS } from '@dnd-kit/utilities'
 import api from '../api/client'
 import type { Vendor, Event } from '../api/types'
 import EditableCell from '../components/EditableCell'
@@ -38,19 +53,7 @@ const CATEGORIES = [
 
 const KNOWN_CATEGORIES = new Set(CATEGORIES.map((c) => c.name))
 
-const CATEGORY_CELL = 'px-3 py-2 text-xs font-bold uppercase tracking-wider text-burgundy-700 bg-gray-50 border-r border-gray-200 align-top w-28'
-
-function AddRow({
-  onAdd,
-  category,
-  withCategoryCell,
-  categoryRowSpan,
-}: {
-  onAdd: (name: string, category: string) => void
-  category: string
-  withCategoryCell?: boolean
-  categoryRowSpan?: number
-}) {
+function AddRow({ onAdd, category }: { onAdd: (name: string, category: string) => void; category: string }) {
   const [name, setName] = useState('')
   const nameRef = useRef<HTMLInputElement>(null)
 
@@ -63,11 +66,8 @@ function AddRow({
 
   return (
     <tr className="border-t border-dashed border-gray-200">
-      {withCategoryCell && (
-        <td rowSpan={categoryRowSpan ?? 1} className={CATEGORY_CELL}>
-          <span className="inline-block pt-1">{category}</span>
-        </td>
-      )}
+      <td className="w-6" />
+      <td className="w-28" />
       <td className="px-4 py-2" colSpan={2}>
         <input
           ref={nameRef}
@@ -84,11 +84,52 @@ function AddRow({
   )
 }
 
+function SortableRow({
+  vendor,
+  categoryLabel,
+  isGroupStart,
+  children,
+}: {
+  vendor: Vendor
+  categoryLabel: string | null
+  isGroupStart: boolean
+  children: React.ReactNode
+}) {
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: vendor.id })
+
+  const style: React.CSSProperties = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.4 : 1,
+    position: 'relative',
+    zIndex: isDragging ? 1 : undefined,
+  }
+
+  return (
+    <tr
+      ref={setNodeRef}
+      style={style}
+      {...attributes}
+      className={`hover:bg-gray-50 group ${vendor.is_paid ? 'opacity-60' : ''} ${isGroupStart ? 'border-t-2 border-gray-200' : 'border-t border-gray-100'}`}
+    >
+      <td className="w-6 pl-2" {...listeners} style={{ cursor: 'grab' }}>
+        <span className="opacity-0 group-hover:opacity-40 text-gray-500 select-none text-sm">⠿</span>
+      </td>
+      <td className={`w-28 px-3 py-2 text-xs font-bold uppercase tracking-wider border-r border-gray-200 align-top ${categoryLabel !== null ? 'text-burgundy-700' : ''} bg-gray-50`}>
+        {categoryLabel !== null && <span className="inline-block pt-1">{categoryLabel}</span>}
+      </td>
+      {children}
+    </tr>
+  )
+}
+
 export default function Vendors() {
   const { eventId } = useParams<{ eventId: string }>()
   const queryClient = useQueryClient()
   const [editBudget, setEditBudget] = useState(false)
   const [budgetInput, setBudgetInput] = useState('')
+
+  const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 5 } }))
 
   const { data: event } = useQuery<Event>({
     queryKey: ['event', eventId],
@@ -118,7 +159,7 @@ export default function Vendors() {
   })
 
   const updateVendor = useMutation({
-    mutationFn: ({ id, ...data }: { id: number; name?: string; vendor_name?: string | null; category?: string | null; contact_name?: string | null; contact_email?: string | null; contact_phone?: string | null; actual?: number | null; is_paid?: boolean }) =>
+    mutationFn: ({ id, ...data }: { id: number; name?: string; vendor_name?: string | null; category?: string | null; contact_name?: string | null; contact_phone?: string | null; actual?: number | null; is_paid?: boolean; sort_order?: number }) =>
       api.patch(`/events/${eventId}/vendors/${id}`, data).then((r) => r.data),
     onSuccess: (updated: Vendor) => {
       queryClient.setQueryData(['vendors', eventId], (old: Vendor[] = []) =>
@@ -132,6 +173,28 @@ export default function Vendors() {
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['vendors', eventId] }),
   })
 
+  function handleDragEnd(event: DragEndEvent, group: Vendor[], catName: string) {
+    const { active, over } = event
+    if (!over || active.id === over.id) return
+
+    const oldIndex = group.findIndex((v) => v.id === active.id)
+    const newIndex = group.findIndex((v) => v.id === over.id)
+    const reordered = arrayMove(group, oldIndex, newIndex)
+
+    // Optimistic update
+    queryClient.setQueryData(['vendors', eventId], (old: Vendor[] = []) => {
+      const others = old.filter((v) => v.category !== catName || (!KNOWN_CATEGORIES.has(v.category ?? '') && catName === 'Other'))
+      const updated = reordered.map((v, idx) => ({ ...v, sort_order: idx * 10 }))
+      return [...others, ...updated]
+    })
+
+    // Persist only changed rows
+    reordered.forEach((v, idx) => {
+      const newOrder = idx * 10
+      if (v.sort_order !== newOrder) updateVendor.mutate({ id: v.id, sort_order: newOrder })
+    })
+  }
+
   const fmt = (n: number) => `₪${Math.round(n).toLocaleString()}`
   const budgetTotal = event?.budget_total ?? null
   const totalActual = vendors.reduce((s, v) => s + Number(v.actual ?? 0), 0)
@@ -140,56 +203,55 @@ export default function Vendors() {
 
   const vendorsByCategory: Record<string, Vendor[]> = {}
   for (const cat of CATEGORIES) {
-    vendorsByCategory[cat.name] = vendors.filter((v) => v.category === cat.name)
+    vendorsByCategory[cat.name] = vendors.filter((v) => v.category === cat.name).sort((a, b) => a.sort_order - b.sort_order)
   }
-  const otherVendors = vendors.filter((v) => !v.category || !KNOWN_CATEGORIES.has(v.category))
+  const otherVendors = vendors.filter((v) => !v.category || !KNOWN_CATEGORIES.has(v.category)).sort((a, b) => a.sort_order - b.sort_order)
 
-  // categoryLabel: non-null only on the first row of a group (triggers the rowspan cell)
-  function renderVendorRow(vendor: Vendor, categoryLabel: string | null, rowSpan: number, isGroupStart: boolean) {
+  function renderCategorySection(catName: string, catVendors: Vendor[]) {
+    const ids = catVendors.map((v) => v.id)
+
     return (
-      <tr
-        key={vendor.id}
-        className={`hover:bg-gray-50 group ${vendor.is_paid ? 'opacity-60' : ''} ${isGroupStart ? 'border-t-2 border-gray-200' : 'border-t border-gray-100'}`}
-      >
-        {categoryLabel !== null && (
-          <td rowSpan={rowSpan} className={CATEGORY_CELL}>
-            <span className="inline-block pt-1">{categoryLabel}</span>
-          </td>
-        )}
-        <td className="px-4 py-2 min-w-[140px]">
-          <EditableCell value={vendor.name} bold
-            onSave={(v) => v && updateVendor.mutate({ id: vendor.id, name: v })} />
-        </td>
-        <td className="px-4 py-2 min-w-[140px]">
-          <EditableCell value={vendor.vendor_name} placeholder="vendor name" emptyDisplay="—"
-            onSave={(v) => updateVendor.mutate({ id: vendor.id, vendor_name: v })} />
-        </td>
-        <td className="px-4 py-2 min-w-[130px]">
-          <EditableCell value={vendor.contact_name} placeholder="contact name" emptyDisplay="—"
-            onSave={(v) => updateVendor.mutate({ id: vendor.id, contact_name: v })} />
-        </td>
-        <td className="px-4 py-2 min-w-[110px]">
-          <EditableCell value={vendor.contact_phone} placeholder="phone" emptyDisplay="—"
-            onSave={(v) => updateVendor.mutate({ id: vendor.id, contact_phone: v })} />
-        </td>
-        <td className="px-4 py-2 min-w-[90px]">
-          <EditableCell
-            value={vendor.actual != null ? String(Math.round(Number(vendor.actual))) : ''}
-            type="number" placeholder="0" emptyDisplay="—"
-            onSave={(v) => updateVendor.mutate({ id: vendor.id, actual: v ? parseFloat(v) : null })} />
-        </td>
-        <td className="px-4 py-2 text-center">
-          <button
-            onClick={() => updateVendor.mutate({ id: vendor.id, is_paid: !vendor.is_paid })}
-            className={`text-xs px-2 py-0.5 rounded-full font-medium transition-colors cursor-pointer ${vendor.is_paid ? 'bg-green-100 text-[#2d7a4a] hover:bg-green-200' : 'bg-gray-100 text-gray-500 hover:bg-gray-200'}`}
-          >
-            {vendor.is_paid ? 'Paid' : 'Unpaid'}
-          </button>
-        </td>
-        <td className="px-4 py-2 text-right">
-          <button onClick={() => deleteVendor.mutate(vendor.id)} className="hover:text-red-500 text-lg transition-colors" style={{ color: '#7a6a60' }}>×</button>
-        </td>
-      </tr>
+      <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={(e) => handleDragEnd(e, catVendors, catName)}>
+        <SortableContext items={ids} strategy={verticalListSortingStrategy}>
+          {catVendors.map((vendor, idx) => (
+            <SortableRow key={vendor.id} vendor={vendor} categoryLabel={idx === 0 ? catName : null} isGroupStart={idx === 0}>
+              <td className="px-4 py-2 min-w-[140px]">
+                <EditableCell value={vendor.name} bold
+                  onSave={(v) => v && updateVendor.mutate({ id: vendor.id, name: v })} />
+              </td>
+              <td className="px-4 py-2 min-w-[140px]">
+                <EditableCell value={vendor.vendor_name} placeholder="vendor name" emptyDisplay="—"
+                  onSave={(v) => updateVendor.mutate({ id: vendor.id, vendor_name: v })} />
+              </td>
+              <td className="px-4 py-2 min-w-[130px]">
+                <EditableCell value={vendor.contact_name} placeholder="contact name" emptyDisplay="—"
+                  onSave={(v) => updateVendor.mutate({ id: vendor.id, contact_name: v })} />
+              </td>
+              <td className="px-4 py-2 min-w-[110px]">
+                <EditableCell value={vendor.contact_phone} placeholder="phone" emptyDisplay="—"
+                  onSave={(v) => updateVendor.mutate({ id: vendor.id, contact_phone: v })} />
+              </td>
+              <td className="px-4 py-2 min-w-[90px]">
+                <EditableCell
+                  value={vendor.actual != null ? String(Math.round(Number(vendor.actual))) : ''}
+                  type="number" placeholder="0" emptyDisplay="—"
+                  onSave={(v) => updateVendor.mutate({ id: vendor.id, actual: v ? parseFloat(v) : null })} />
+              </td>
+              <td className="px-4 py-2 text-center">
+                <button
+                  onClick={() => updateVendor.mutate({ id: vendor.id, is_paid: !vendor.is_paid })}
+                  className={`text-xs px-2 py-0.5 rounded-full font-medium transition-colors cursor-pointer ${vendor.is_paid ? 'bg-green-100 text-[#2d7a4a] hover:bg-green-200' : 'bg-gray-100 text-gray-500 hover:bg-gray-200'}`}
+                >
+                  {vendor.is_paid ? 'Paid' : 'Unpaid'}
+                </button>
+              </td>
+              <td className="px-4 py-2 text-right">
+                <button onClick={() => deleteVendor.mutate(vendor.id)} className="hover:text-red-500 text-lg leading-none transition-colors" style={{ color: '#7a6a60' }}>×</button>
+              </td>
+            </SortableRow>
+          ))}
+        </SortableContext>
+      </DndContext>
     )
   }
 
@@ -228,7 +290,7 @@ export default function Vendors() {
             <button onClick={() => setEditBudget(false)} className="px-3 py-2 rounded-lg text-sm text-gray-600 hover:bg-gray-100">Cancel</button>
           </div>
         )}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+        <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
           <div>
             <p className="text-base font-bold text-gray-400 mb-1">Total Budget</p>
             <p className="text-3xl font-bold text-gray-900">{budgetTotal != null ? fmt(Number(budgetTotal)) : '—'}</p>
@@ -266,7 +328,8 @@ export default function Vendors() {
           <table className="w-full text-sm">
             <thead className="bg-gray-50 text-gray-500 text-xs uppercase tracking-wide border-b border-gray-200">
               <tr>
-                <th className="px-3 py-3 w-28" />
+                <th className="w-6" />
+                <th className="w-28 px-3 py-3" />
                 <th className="px-4 py-3 text-left">Vendor Type</th>
                 <th className="px-4 py-3 text-left">Vendor</th>
                 <th className="px-4 py-3 text-left">Contact Name</th>
@@ -277,43 +340,16 @@ export default function Vendors() {
               </tr>
             </thead>
             <tbody>
-              {CATEGORIES.map((cat) => {
-                const catVendors = vendorsByCategory[cat.name]
-                const totalRows = catVendors.length + 1
-
-                return (
-                  <Fragment key={cat.name}>
-                    {catVendors.length === 0 ? (
-                      <AddRow
-                        category={cat.name}
-                        onAdd={(name, category) => createVendor.mutate({ name, category })}
-                        withCategoryCell
-                        categoryRowSpan={1}
-                      />
-                    ) : (
-                      <>
-                        {catVendors.map((vendor, idx) =>
-                          renderVendorRow(vendor, idx === 0 ? cat.name : null, totalRows, idx === 0)
-                        )}
-                        <AddRow
-                          category={cat.name}
-                          onAdd={(name, category) => createVendor.mutate({ name, category })}
-                        />
-                      </>
-                    )}
-                  </Fragment>
-                )
-              })}
-
+              {CATEGORIES.map((cat) => (
+                <Fragment key={cat.name}>
+                  {renderCategorySection(cat.name, vendorsByCategory[cat.name])}
+                  <AddRow category={cat.name} onAdd={(name, category) => createVendor.mutate({ name, category })} />
+                </Fragment>
+              ))}
               {otherVendors.length > 0 && (
                 <Fragment key="other">
-                  {otherVendors.map((vendor, idx) =>
-                    renderVendorRow(vendor, idx === 0 ? 'Other' : null, otherVendors.length + 1, idx === 0)
-                  )}
-                  <AddRow
-                    category=""
-                    onAdd={(name) => createVendor.mutate({ name, category: null })}
-                  />
+                  {renderCategorySection('Other', otherVendors)}
+                  <AddRow category="" onAdd={(name) => createVendor.mutate({ name, category: null })} />
                 </Fragment>
               )}
             </tbody>

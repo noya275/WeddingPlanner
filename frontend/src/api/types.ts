@@ -66,5 +66,6 @@ export interface Vendor {
   actual: number | null
   is_paid: boolean
   status: VendorStatus
+  sort_order: number
   notes: string | null
 }

@@ -28,6 +28,7 @@ class Vendor(Base):
     actual = Column(Numeric(10, 2))
     is_paid = Column(Boolean, default=False)
     status = Column(Enum(VendorStatus), default=VendorStatus.prospect)
+    sort_order = Column(Integer, default=0)
     notes = Column(String)
 
     event = relationship("Event", back_populates="vendors")

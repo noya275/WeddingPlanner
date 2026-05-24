@@ -1,5 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
+from sqlalchemy import func
 from typing import List
 from ..database import get_db
 from ..models.vendor import Vendor
@@ -25,7 +26,7 @@ def list_vendors(
     current_user: User = Depends(get_current_user),
 ):
     get_event_or_404(event_id, current_user.id, db)
-    return db.query(Vendor).filter(Vendor.event_id == event_id).all()
+    return db.query(Vendor).filter(Vendor.event_id == event_id).order_by(Vendor.sort_order).all()
 
 
 @router.post("/events/{event_id}/vendors", response_model=VendorOut, status_code=201)
@@ -36,7 +37,11 @@ def create_vendor(
     current_user: User = Depends(get_current_user),
 ):
     get_event_or_404(event_id, current_user.id, db)
-    vendor = Vendor(**data.model_dump(), event_id=event_id)
+    payload = data.model_dump()
+    if payload.get('sort_order') == 0:
+        max_order = db.query(func.max(Vendor.sort_order)).filter(Vendor.event_id == event_id).scalar() or 0
+        payload['sort_order'] = max_order + 1
+    vendor = Vendor(**payload, event_id=event_id)
     db.add(vendor)
     db.commit()
     db.refresh(vendor)

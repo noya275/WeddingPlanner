@@ -16,6 +16,7 @@ class VendorCreate(BaseModel):
     actual: Optional[Decimal] = None
     is_paid: bool = False
     status: VendorStatus = VendorStatus.prospect
+    sort_order: int = 0
     notes: Optional[str] = None
 
 
@@ -30,6 +31,7 @@ class VendorUpdate(BaseModel):
     actual: Optional[Decimal] = None
     is_paid: Optional[bool] = None
     status: Optional[VendorStatus] = None
+    sort_order: Optional[int] = None
     notes: Optional[str] = None
 
 
