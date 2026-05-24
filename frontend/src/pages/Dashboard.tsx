@@ -6,8 +6,6 @@ import type { Event } from '../api/types'
 
 interface EventFormValues {
   title: string
-  date: string
-  venue: string
 }
 
 function EventForm({
@@ -24,12 +22,10 @@ function EventForm({
   submitLabel: string
 }) {
   const [title, setTitle] = useState(initialValues.title)
-  const [date, setDate] = useState(initialValues.date)
-  const [venue, setVenue] = useState(initialValues.venue)
 
   return (
     <form
-      onSubmit={(e) => { e.preventDefault(); onSubmit({ title, date, venue }) }}
+      onSubmit={(e) => { e.preventDefault(); onSubmit({ title }) }}
       className="bg-white border border-burgundy-200 rounded-2xl p-6 space-y-3"
     >
       <input
@@ -39,20 +35,6 @@ function EventForm({
         placeholder="Event name"
         className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-burgundy-500"
       />
-      <div className="grid grid-cols-2 gap-3">
-        <input
-          type="date"
-          value={date}
-          onChange={(e) => setDate(e.target.value)}
-          className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-burgundy-500"
-        />
-        <input
-          value={venue}
-          onChange={(e) => setVenue(e.target.value)}
-          placeholder="Venue"
-          className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-burgundy-500"
-        />
-      </div>
       <div className="flex gap-2">
         <button
           type="submit"
@@ -86,7 +68,7 @@ export default function Dashboard() {
 
   const createEvent = useMutation({
     mutationFn: (values: EventFormValues) =>
-      api.post('/events/', { title: values.title, date: values.date || undefined, venue: values.venue || undefined }).then((r) => r.data),
+      api.post('/events/', { title: values.title }).then((r) => r.data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['events'] })
       setShowForm(false)
@@ -95,7 +77,7 @@ export default function Dashboard() {
 
   const updateEvent = useMutation({
     mutationFn: ({ id, values }: { id: number; values: EventFormValues }) =>
-      api.patch(`/events/${id}`, { title: values.title, date: values.date || undefined, venue: values.venue || undefined }).then((r) => r.data),
+      api.patch(`/events/${id}`, { title: values.title }).then((r) => r.data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['events'] })
       setEditingId(null)
@@ -122,7 +104,7 @@ export default function Dashboard() {
       {showForm && (
         <div className="mb-6">
           <EventForm
-            initialValues={{ title: '', date: '', venue: '' }}
+            initialValues={{ title: '' }}
             onSubmit={(values) => createEvent.mutate(values)}
             onCancel={() => setShowForm(false)}
             isPending={createEvent.isPending}
@@ -144,7 +126,7 @@ export default function Dashboard() {
             editingId === event.id ? (
               <EventForm
                 key={event.id}
-                initialValues={{ title: event.title, date: event.date ?? '', venue: event.venue ?? '' }}
+                initialValues={{ title: event.title }}
                 onSubmit={(values) => updateEvent.mutate({ id: event.id, values })}
                 onCancel={() => setEditingId(null)}
                 isPending={updateEvent.isPending}
@@ -157,13 +139,9 @@ export default function Dashboard() {
               >
                 <div className="flex justify-between items-center">
                   <Link to={`/events/${event.id}/guests`} className="flex-1 min-w-0 mr-4">
-                    <h2 className="font-bold text-gray-900 text-2xl leading-tight mb-1 hover:text-burgundy-700 transition-colors">
+                    <h2 className="font-bold text-gray-900 text-2xl leading-tight hover:text-burgundy-700 transition-colors">
                       {event.title}
                     </h2>
-                    <div className="flex items-center gap-3 text-sm text-gray-500">
-                      {event.date && <span>{new Date(event.date).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</span>}
-                      {event.venue && <span>· {event.venue}</span>}
-                    </div>
                   </Link>
                   <div className="flex gap-1 shrink-0">
                     <button
