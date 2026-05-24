@@ -19,6 +19,7 @@ class Vendor(Base):
     id = Column(Integer, primary_key=True, index=True)
     event_id = Column(Integer, ForeignKey("events.id"), nullable=False)
     name = Column(String, nullable=False)
+    vendor_name = Column(String)
     category = Column(String)
     contact_name = Column(String)
     contact_email = Column(String)

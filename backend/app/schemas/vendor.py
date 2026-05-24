@@ -7,6 +7,7 @@ from ..models.vendor import VendorStatus
 
 class VendorCreate(BaseModel):
     name: str
+    vendor_name: Optional[str] = None
     category: Optional[str] = None
     contact_name: Optional[str] = None
     contact_email: Optional[str] = None
@@ -20,6 +21,7 @@ class VendorCreate(BaseModel):
 
 class VendorUpdate(BaseModel):
     name: Optional[str] = None
+    vendor_name: Optional[str] = None
     category: Optional[str] = None
     contact_name: Optional[str] = None
     contact_email: Optional[str] = None

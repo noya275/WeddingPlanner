@@ -57,6 +57,7 @@ export interface Vendor {
   id: number
   event_id: number
   name: string
+  vendor_name: string | null
   category: string | null
   contact_name: string | null
   contact_email: string | null

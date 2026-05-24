@@ -2,15 +2,8 @@ import { useState, useRef, Fragment } from 'react'
 import { useParams } from 'react-router-dom'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import api from '../api/client'
-import type { Vendor, VendorStatus, Event } from '../api/types'
+import type { Vendor, Event } from '../api/types'
 import EditableCell from '../components/EditableCell'
-
-const STATUS_COLORS: Record<VendorStatus, string> = {
-  prospect: 'bg-gray-100 text-gray-600',
-  contacted: 'bg-blue-100 text-blue-600',
-  booked: 'bg-green-100 text-[#2d7a4a]',
-  cancelled: 'bg-red-100 text-red-700',
-}
 
 const CATEGORIES = [
   {
@@ -86,7 +79,7 @@ function AddRow({
           className="w-full text-sm outline-none bg-transparent text-gray-700 guest-add-input"
         />
       </td>
-      <td colSpan={6} />
+      <td colSpan={5} />
     </tr>
   )
 }
@@ -125,7 +118,7 @@ export default function Vendors() {
   })
 
   const updateVendor = useMutation({
-    mutationFn: ({ id, ...data }: { id: number; name?: string; category?: string | null; contact_name?: string | null; contact_email?: string | null; contact_phone?: string | null; price?: number | null; actual?: number | null; is_paid?: boolean; status?: VendorStatus }) =>
+    mutationFn: ({ id, ...data }: { id: number; name?: string; vendor_name?: string | null; category?: string | null; contact_name?: string | null; contact_email?: string | null; contact_phone?: string | null; actual?: number | null; is_paid?: boolean }) =>
       api.patch(`/events/${eventId}/vendors/${id}`, data).then((r) => r.data),
     onSuccess: (updated: Vendor) => {
       queryClient.setQueryData(['vendors', eventId], (old: Vendor[] = []) =>
@@ -141,7 +134,6 @@ export default function Vendors() {
 
   const fmt = (n: number) => `₪${Math.round(n).toLocaleString()}`
   const budgetTotal = event?.budget_total ?? null
-  const totalEstimated = vendors.reduce((s, v) => s + Number(v.price ?? 0), 0)
   const totalActual = vendors.reduce((s, v) => s + Number(v.actual ?? 0), 0)
   const remaining = budgetTotal != null ? Number(budgetTotal) - totalActual : null
   const spentPct = budgetTotal ? Math.min(100, Math.round((totalActual / Number(budgetTotal)) * 100)) : null
@@ -168,6 +160,10 @@ export default function Vendors() {
           <EditableCell value={vendor.name} bold
             onSave={(v) => v && updateVendor.mutate({ id: vendor.id, name: v })} />
         </td>
+        <td className="px-4 py-2 min-w-[140px]">
+          <EditableCell value={vendor.vendor_name} placeholder="vendor name" emptyDisplay="—"
+            onSave={(v) => updateVendor.mutate({ id: vendor.id, vendor_name: v })} />
+        </td>
         <td className="px-4 py-2 min-w-[130px]">
           <EditableCell value={vendor.contact_name} placeholder="contact name" emptyDisplay="—"
             onSave={(v) => updateVendor.mutate({ id: vendor.id, contact_name: v })} />
@@ -175,12 +171,6 @@ export default function Vendors() {
         <td className="px-4 py-2 min-w-[110px]">
           <EditableCell value={vendor.contact_phone} placeholder="phone" emptyDisplay="—"
             onSave={(v) => updateVendor.mutate({ id: vendor.id, contact_phone: v })} />
-        </td>
-        <td className="px-4 py-2 min-w-[90px]">
-          <EditableCell
-            value={vendor.price != null ? String(Math.round(Number(vendor.price))) : ''}
-            type="number" placeholder="0" emptyDisplay="—"
-            onSave={(v) => updateVendor.mutate({ id: vendor.id, price: v ? parseFloat(v) : null })} />
         </td>
         <td className="px-4 py-2 min-w-[90px]">
           <EditableCell
@@ -195,18 +185,6 @@ export default function Vendors() {
           >
             {vendor.is_paid ? 'Paid' : 'Unpaid'}
           </button>
-        </td>
-        <td className="px-4 py-2">
-          <select
-            value={vendor.status}
-            onChange={(e) => updateVendor.mutate({ id: vendor.id, status: e.target.value as VendorStatus })}
-            className={`text-sm font-medium px-2 py-1 rounded-full border-0 cursor-pointer ${STATUS_COLORS[vendor.status]}`}
-          >
-            <option value="prospect">Prospect</option>
-            <option value="contacted">Contacted</option>
-            <option value="booked">Booked</option>
-            <option value="cancelled">Cancelled</option>
-          </select>
         </td>
         <td className="px-4 py-2 text-right">
           <button onClick={() => deleteVendor.mutate(vendor.id)} className="hover:text-red-500 text-lg transition-colors" style={{ color: '#7a6a60' }}>×</button>
@@ -256,10 +234,6 @@ export default function Vendors() {
             <p className="text-3xl font-bold text-gray-900">{budgetTotal != null ? fmt(Number(budgetTotal)) : '—'}</p>
           </div>
           <div>
-            <p className="text-base font-bold text-gray-400 mb-1">Estimated</p>
-            <p className="text-3xl font-bold text-gray-700">{fmt(totalEstimated)}</p>
-          </div>
-          <div>
             <p className="text-base font-bold text-gray-400 mb-1">Actual Spend</p>
             <p className="text-3xl font-bold text-gray-700">{fmt(totalActual)}</p>
           </div>
@@ -293,13 +267,12 @@ export default function Vendors() {
             <thead className="bg-gray-50 text-gray-500 text-xs uppercase tracking-wide border-b border-gray-200">
               <tr>
                 <th className="px-3 py-3 w-28" />
+                <th className="px-4 py-3 text-left">Vendor Type</th>
                 <th className="px-4 py-3 text-left">Vendor</th>
                 <th className="px-4 py-3 text-left">Contact Name</th>
                 <th className="px-4 py-3 text-left">Phone</th>
-                <th className="px-4 py-3 text-left">Estimated (₪)</th>
-                <th className="px-4 py-3 text-left">Actual (₪)</th>
+                <th className="px-4 py-3 text-left">Cost (₪)</th>
                 <th className="px-4 py-3 text-center">Paid</th>
-                <th className="px-4 py-3 text-left">Status</th>
                 <th className="px-4 py-3" />
               </tr>
             </thead>
