@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect, Fragment } from 'react'
+import { useState, useRef, Fragment } from 'react'
 import { useParams } from 'react-router-dom'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import api from '../api/client'
@@ -84,51 +84,11 @@ function AddRow({
   )
 }
 
-function InlineAddRow({
-  category,
-  onAdd,
-  onCancel,
-}: {
-  category: string
-  onAdd: (name: string, category: string) => void
-  onCancel: () => void
-}) {
-  const [name, setName] = useState('')
-  const ref = useRef<HTMLInputElement>(null)
-  useEffect(() => { ref.current?.focus() }, [])
-
-  function submit() {
-    if (name.trim()) onAdd(name.trim(), category)
-    else onCancel()
-  }
-
-  return (
-    <tr className="border-t border-burgundy-200 bg-burgundy-50/40">
-      <td className="px-4 py-1.5" colSpan={2}>
-        <input
-          ref={ref}
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          onKeyDown={(e) => {
-            if (e.key === 'Enter') { e.preventDefault(); submit() }
-            if (e.key === 'Escape') { e.preventDefault(); onCancel() }
-          }}
-          onBlur={submit}
-          placeholder="Vendor type name..."
-          className="w-full text-sm outline-none bg-transparent text-gray-700"
-        />
-      </td>
-      <td colSpan={5} />
-    </tr>
-  )
-}
-
 export default function Vendors() {
   const { eventId } = useParams<{ eventId: string }>()
   const queryClient = useQueryClient()
   const [editBudget, setEditBudget] = useState(false)
   const [budgetInput, setBudgetInput] = useState('')
-  const [insertAfterId, setInsertAfterId] = useState<number | null>(null)
 
   const { data: event } = useQuery<Event>({
     queryKey: ['event', eventId],
@@ -227,19 +187,7 @@ export default function Vendors() {
           </button>
         </td>
         <td className="px-4 py-2 text-right">
-          <div className="flex gap-1 justify-end items-center">
-            <button
-              onClick={() => setInsertAfterId(insertAfterId === vendor.id ? null : vendor.id)}
-              className="opacity-0 group-hover:opacity-100 transition-opacity text-base px-1 hover:text-burgundy-600"
-              style={{ color: '#7a6a60' }}
-              title="Insert row below"
-            >+</button>
-            <button
-              onClick={() => { if (insertAfterId === vendor.id) setInsertAfterId(null); deleteVendor.mutate(vendor.id) }}
-              className="hover:text-red-500 text-lg leading-none px-1 transition-colors"
-              style={{ color: '#7a6a60' }}
-            >×</button>
-          </div>
+          <button onClick={() => deleteVendor.mutate(vendor.id)} className="hover:text-red-500 text-lg transition-colors" style={{ color: '#7a6a60' }}>×</button>
         </td>
       </tr>
     )
@@ -331,8 +279,7 @@ export default function Vendors() {
             <tbody>
               {CATEGORIES.map((cat) => {
                 const catVendors = vendorsByCategory[cat.name]
-                const insertInCat = insertAfterId !== null && catVendors.some((v) => v.id === insertAfterId)
-                const totalRows = catVendors.length + (insertInCat ? 1 : 0) + 1
+                const totalRows = catVendors.length + 1
 
                 return (
                   <Fragment key={cat.name}>
@@ -345,18 +292,9 @@ export default function Vendors() {
                       />
                     ) : (
                       <>
-                        {catVendors.map((vendor, idx) => (
-                          <Fragment key={vendor.id}>
-                            {renderVendorRow(vendor, idx === 0 ? cat.name : null, totalRows, idx === 0)}
-                            {insertAfterId === vendor.id && (
-                              <InlineAddRow
-                                category={cat.name}
-                                onAdd={(name, category) => { createVendor.mutate({ name, category }); setInsertAfterId(null) }}
-                                onCancel={() => setInsertAfterId(null)}
-                              />
-                            )}
-                          </Fragment>
-                        ))}
+                        {catVendors.map((vendor, idx) =>
+                          renderVendorRow(vendor, idx === 0 ? cat.name : null, totalRows, idx === 0)
+                        )}
                         <AddRow
                           category={cat.name}
                           onAdd={(name, category) => createVendor.mutate({ name, category })}
@@ -369,30 +307,13 @@ export default function Vendors() {
 
               {otherVendors.length > 0 && (
                 <Fragment key="other">
-                  {(() => {
-                    const insertInOther = insertAfterId !== null && otherVendors.some((v) => v.id === insertAfterId)
-                    const totalRows = otherVendors.length + (insertInOther ? 1 : 0) + 1
-                    return (
-                      <>
-                        {otherVendors.map((vendor, idx) => (
-                          <Fragment key={vendor.id}>
-                            {renderVendorRow(vendor, idx === 0 ? 'Other' : null, totalRows, idx === 0)}
-                            {insertAfterId === vendor.id && (
-                              <InlineAddRow
-                                category={vendor.category ?? ''}
-                                onAdd={(name, category) => { createVendor.mutate({ name, category }); setInsertAfterId(null) }}
-                                onCancel={() => setInsertAfterId(null)}
-                              />
-                            )}
-                          </Fragment>
-                        ))}
-                        <AddRow
-                          category=""
-                          onAdd={(name) => createVendor.mutate({ name, category: null })}
-                        />
-                      </>
-                    )
-                  })()}
+                  {otherVendors.map((vendor, idx) =>
+                    renderVendorRow(vendor, idx === 0 ? 'Other' : null, otherVendors.length + 1, idx === 0)
+                  )}
+                  <AddRow
+                    category=""
+                    onAdd={(name) => createVendor.mutate({ name, category: null })}
+                  />
                 </Fragment>
               )}
             </tbody>
