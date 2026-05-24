@@ -35,7 +35,7 @@ const CATEGORIES = [
   },
   {
     name: 'Must-Have Vendors',
-    items: ['DJ', 'Photographer', 'Alcohol', 'Wedding Invitations', 'RSVP', 'Wedding Favors'],
+    items: ['DJ', 'Photographer', 'Alcohol', 'Wedding Invitations', 'RSVP', 'Wedding Gimmicks'],
   },
   {
     name: 'Optional Vendors',
