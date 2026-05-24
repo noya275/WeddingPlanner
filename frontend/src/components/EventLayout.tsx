@@ -28,12 +28,6 @@ export default function EventLayout() {
             ← Events
           </Link>
           <h2 className="font-bold text-gray-900 text-xl leading-tight mb-1">{event?.title ?? '…'}</h2>
-          {event?.date && (
-            <p className="text-sm text-gray-500 mb-0.5">
-              {new Date(event.date).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
-            </p>
-          )}
-          {event?.venue && <p className="text-sm text-gray-500">{event.venue}</p>}
 
           <div className="border-t border-gray-100 mt-4 pt-4 space-y-1">
             {NAV_ITEMS.map(({ label, path, icon, gray, text }) => (
