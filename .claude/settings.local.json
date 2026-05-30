@@ -26,7 +26,13 @@
       "Bash(grep -n \"\\\\$\\\\|dollar\\\\|USD\\\\|currency\\\\|toLocaleString\\\\|toFixed\" \"/Users/noya/Downloads/Personal/Personal Projects/WeddingPlanner/frontend/src/pages/Budget.tsx\")",
       "Bash(grep *)",
       "Bash(sqlite3 wedding_planner.db \"DELETE FROM guests WHERE name='hi'\")",
-      "Bash(npx tsc *)"
+      "Bash(npx tsc *)",
+      "Bash(pkill -f \"uvicorn app.main\")",
+      "Bash(python3 -m playwright --version)",
+      "Bash(npx playwright *)",
+      "Bash(python3 -m playwright install chromium)",
+      "Bash(pip3 install *)",
+      "Bash(cd *)"
     ]
   }
 }
