@@ -1,5 +1,5 @@
 import enum
-from sqlalchemy import Column, Integer, String, ForeignKey, Enum, Date
+from sqlalchemy import Column, Integer, String, ForeignKey, Enum
 from sqlalchemy.orm import relationship
 from ..database import Base
 
@@ -18,10 +18,6 @@ class Task(Base):
     id = Column(Integer, primary_key=True, index=True)
     event_id = Column(Integer, ForeignKey("events.id"), nullable=False)
     title = Column(String, nullable=False)
-    description = Column(String)
-    assigned_to = Column(String)
-    due_date = Column(Date)
     status = Column(Enum(TaskStatus), default=TaskStatus.todo)
-    category = Column(String)
 
     event = relationship("Event", back_populates="tasks")

@@ -38,11 +38,7 @@ export interface Task {
   id: number
   event_id: number
   title: string
-  description: string | null
-  assigned_to: string | null
-  due_date: string | null
   status: TaskStatus
-  category: string | null
 }
 
 export interface RSVPInfo {

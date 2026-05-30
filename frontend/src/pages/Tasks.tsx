@@ -56,10 +56,6 @@ const { data: tasks = [], isLoading } = useQuery<Task[]>({
         event_id: Number(eventId),
         title: data.title as string,
         status: (data.status as TaskStatus) ?? 'todo',
-        description: null,
-        assigned_to: null,
-        due_date: null,
-        category: null,
       }
       queryClient.setQueryData(['tasks', eventId], (old: Task[] = []) => [...old, tempTask])
       return { previous }
@@ -71,7 +67,7 @@ const { data: tasks = [], isLoading } = useQuery<Task[]>({
   })
 
   const updateTask = useMutation({
-    mutationFn: ({ id, ...data }: { id: number; title?: string; status?: TaskStatus; assigned_to?: string | null; due_date?: string | null; category?: string | null }) =>
+    mutationFn: ({ id, ...data }: { id: number; title?: string; status?: TaskStatus }) =>
       api.patch(`/events/${eventId}/tasks/${id}`, data).then((r) => r.data),
     onMutate: async (patch) => {
       await queryClient.cancelQueries({ queryKey: ['tasks', eventId] })
