@@ -180,12 +180,47 @@ export default function GuestList() {
   const createGuest = useMutation({
     mutationFn: (payload: object) =>
       api.post(`/events/${eventId}/guests`, payload).then((r) => r.data),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['guests', eventId] }),
+    onMutate: async (payload: Record<string, unknown>) => {
+      await queryClient.cancelQueries({ queryKey: ['guests', eventId] })
+      const previous = queryClient.getQueryData<Guest[]>(['guests', eventId])
+      const tempGuest: Guest = {
+        id: -Date.now(),
+        event_id: Number(eventId),
+        name: payload.name as string,
+        phone: (payload.phone as string) ?? null,
+        email: null,
+        plus_one: false,
+        rsvp_status: 'pending',
+        rsvp_sent: false,
+        rsvp_token: null,
+        side: (payload.side as 'bride' | 'groom') ?? null,
+        dietary_restrictions: null,
+        table_number: null,
+        notes: null,
+      }
+      queryClient.setQueryData(['guests', eventId], (old: Guest[] = []) => [...old, tempGuest])
+      return { previous }
+    },
+    onError: (_, __, context) => {
+      if (context?.previous) queryClient.setQueryData(['guests', eventId], context.previous)
+    },
+    onSettled: () => queryClient.invalidateQueries({ queryKey: ['guests', eventId] }),
   })
 
   const updateGuest = useMutation({
     mutationFn: ({ id, ...data }: GuestPatch) =>
       api.patch(`/events/${eventId}/guests/${id}`, data).then((r) => r.data),
+    onMutate: async (patch: GuestPatch) => {
+      await queryClient.cancelQueries({ queryKey: ['guests', eventId] })
+      const previous = queryClient.getQueryData<Guest[]>(['guests', eventId])
+      queryClient.setQueryData(['guests', eventId], (old: Guest[] = []) =>
+        old.map((g) => (g.id === patch.id ? { ...g, ...patch } : g))
+      )
+      return { previous }
+    },
+    onError: (_, __, context) => {
+      if (context?.previous) queryClient.setQueryData(['guests', eventId], context.previous)
+    },
     onSuccess: (updated: Guest) => {
       queryClient.setQueryData(['guests', eventId], (old: Guest[] = []) =>
         old.map((g) => (g.id === updated.id ? updated : g))
@@ -195,7 +230,16 @@ export default function GuestList() {
 
   const deleteGuest = useMutation({
     mutationFn: (id: number) => api.delete(`/events/${eventId}/guests/${id}`),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['guests', eventId] }),
+    onMutate: async (id: number) => {
+      await queryClient.cancelQueries({ queryKey: ['guests', eventId] })
+      const previous = queryClient.getQueryData<Guest[]>(['guests', eventId])
+      queryClient.setQueryData(['guests', eventId], (old: Guest[] = []) => old.filter((g) => g.id !== id))
+      return { previous }
+    },
+    onError: (_, __, context) => {
+      if (context?.previous) queryClient.setQueryData(['guests', eventId], context.previous)
+    },
+    onSettled: () => queryClient.invalidateQueries({ queryKey: ['guests', eventId] }),
   })
 
   function buildWhatsAppUrl(guest: Guest) {
