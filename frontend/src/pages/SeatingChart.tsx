@@ -180,6 +180,17 @@ export default function SeatingChart() {
   const updateGuest = useMutation({
     mutationFn: ({ id, table_number }: { id: number; table_number: number | null }) =>
       api.patch(`/events/${eventId}/guests/${id}`, { table_number }).then((r) => r.data),
+    onMutate: async ({ id, table_number }) => {
+      await queryClient.cancelQueries({ queryKey: ['guests', eventId] })
+      const previous = queryClient.getQueryData<Guest[]>(['guests', eventId])
+      queryClient.setQueryData(['guests', eventId], (old: Guest[] = []) =>
+        old.map((g) => (g.id === id ? { ...g, table_number } : g))
+      )
+      return { previous }
+    },
+    onError: (_, __, context) => {
+      if (context?.previous) queryClient.setQueryData(['guests', eventId], context.previous)
+    },
     onSuccess: (updated: Guest) => {
       queryClient.setQueryData(['guests', eventId], (old: Guest[] = []) =>
         old.map((g) => (g.id === updated.id ? updated : g))
