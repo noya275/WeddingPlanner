@@ -262,6 +262,15 @@ export default function Vendors() {
     return (
       <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={(e) => handleDragEnd(e, catVendors, catName)}>
         <SortableContext items={ids} strategy={verticalListSortingStrategy}>
+          {catVendors.length === 0 && (
+            <tr className="border-t-2 border-gray-200">
+              <td className="w-6" />
+              <td className="w-28 px-3 py-2 text-xs font-bold uppercase tracking-wider border-r border-gray-200 text-burgundy-700 bg-gray-50">
+                <span className="inline-block pt-1">{catName}</span>
+              </td>
+              <td colSpan={7} className="bg-gray-50" />
+            </tr>
+          )}
           {catVendors.map((vendor, idx) => (
             <SortableRow key={vendor.id} vendor={vendor} categoryLabel={idx === 0 ? catName : null} isGroupStart={idx === 0}>
               <td className="px-4 py-2 min-w-[140px]">
