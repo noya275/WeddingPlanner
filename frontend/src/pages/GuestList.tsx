@@ -181,20 +181,20 @@ export default function GuestList() {
     mutationFn: (payload: object) =>
       api.post(`/events/${eventId}/guests`, payload).then((r) => r.data),
     onMutate: async (payload) => {
-      const p = payload as Record<string, unknown>
+      const data = payload as Record<string, unknown>
       await queryClient.cancelQueries({ queryKey: ['guests', eventId] })
       const previous = queryClient.getQueryData<Guest[]>(['guests', eventId])
       const tempGuest: Guest = {
         id: -Date.now(),
         event_id: Number(eventId),
-        name: p.name as string,
-        phone: (p.phone as string) ?? null,
+        name: data.name as string,
+        phone: (data.phone as string) ?? null,
         email: null,
         plus_one: false,
         rsvp_status: 'pending',
         rsvp_sent: false,
         rsvp_token: null,
-        side: (p.side as 'bride' | 'groom') ?? null,
+        side: (data.side as 'bride' | 'groom') ?? null,
         dietary_restrictions: null,
         table_number: null,
         notes: null,
