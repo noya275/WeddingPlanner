@@ -85,17 +85,7 @@ function AddRow({ onAdd, category }: { onAdd: (name: string, category: string) =
   )
 }
 
-function SortableRow({
-  vendor,
-  categoryLabel,
-  isGroupStart,
-  children,
-}: {
-  vendor: Vendor
-  categoryLabel: string | null
-  isGroupStart: boolean
-  children: React.ReactNode
-}) {
+function SortableRow({ vendor, children }: { vendor: Vendor; children: React.ReactNode }) {
   const { attributes, listeners, setNodeRef, transform, isDragging } = useSortable({ id: vendor.id })
 
   const style: React.CSSProperties = {
@@ -110,14 +100,12 @@ function SortableRow({
       ref={setNodeRef}
       style={style}
       {...attributes}
-      className={`hover:bg-gray-50 group ${vendor.is_paid ? 'opacity-60' : ''} ${isGroupStart ? 'border-t-2 border-gray-200' : 'border-t border-gray-100'}`}
+      className={`hover:bg-gray-50 group border-t border-gray-100 ${vendor.is_paid ? 'opacity-60' : ''}`}
     >
       <td className="w-6 pl-2" {...listeners} style={{ cursor: 'grab' }}>
         <span className="opacity-0 group-hover:opacity-40 text-gray-500 select-none text-sm">⠿</span>
       </td>
-      <td className={`w-28 px-3 py-2 text-xs font-bold uppercase tracking-wider border-r border-gray-200 align-top ${categoryLabel !== null ? 'text-burgundy-700' : ''} bg-gray-50`}>
-        {categoryLabel !== null && <span className="inline-block pt-1">{categoryLabel}</span>}
-      </td>
+      <td className="w-28 bg-gray-50 border-r border-gray-200" />
       {children}
     </tr>
   )
@@ -267,17 +255,15 @@ export default function Vendors() {
     return (
       <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={(e) => handleDragEnd(e, catVendors, catName)}>
         <SortableContext items={ids} strategy={verticalListSortingStrategy}>
-          {catVendors.length === 0 && (
-            <tr className="border-t-2 border-gray-200">
-              <td className="w-6" />
-              <td className="w-28 px-3 py-2 text-xs font-bold uppercase tracking-wider border-r border-gray-200 text-burgundy-700 bg-gray-50">
-                <span className="inline-block pt-1">{catName}</span>
-              </td>
-              <td colSpan={7} className="bg-gray-50" />
-            </tr>
-          )}
-          {catVendors.map((vendor, idx) => (
-            <SortableRow key={vendor.id} vendor={vendor} categoryLabel={idx === 0 ? catName : null} isGroupStart={idx === 0}>
+          <tr className="border-t-2 border-gray-200">
+            <td className="w-6" />
+            <td className="w-28 px-3 py-2 text-xs font-bold uppercase tracking-wider border-r border-gray-200 text-burgundy-700 bg-gray-50">
+              <span className="inline-block pt-1">{catName}</span>
+            </td>
+            <td colSpan={7} className="bg-gray-50" />
+          </tr>
+          {catVendors.map((vendor) => (
+            <SortableRow key={vendor.id} vendor={vendor}>
               <td className="px-4 py-2 min-w-[140px]">
                 <EditableCell value={vendor.name} bold
                   onSave={(v) => v && updateVendor.mutate({ id: vendor.id, name: v })} />
