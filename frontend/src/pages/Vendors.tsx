@@ -96,7 +96,7 @@ function SortableRow({
   isGroupStart: boolean
   children: React.ReactNode
 }) {
-  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: vendor.id })
+  const { attributes, listeners, setNodeRef, transform, isDragging } = useSortable({ id: vendor.id })
 
   const style: React.CSSProperties = {
     transform: CSS.Transform.toString(transform),
