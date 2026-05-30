@@ -69,10 +69,27 @@ export default function Dashboard() {
   const createEvent = useMutation({
     mutationFn: (values: EventFormValues) =>
       api.post('/events/', { title: values.title }).then((r) => r.data),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['events'] })
+    onMutate: async (values) => {
+      await queryClient.cancelQueries({ queryKey: ['events'] })
+      const previous = queryClient.getQueryData<Event[]>(['events'])
+      const tempEvent: Event = {
+        id: -Date.now(),
+        title: values.title,
+        date: null,
+        venue: null,
+        description: null,
+        budget_total: null,
+        created_at: new Date().toISOString(),
+      }
+      queryClient.setQueryData(['events'], (old: Event[] = []) => [...old, tempEvent])
       setShowForm(false)
+      return { previous }
     },
+    onError: (_, __, context) => {
+      if (context?.previous) queryClient.setQueryData(['events'], context.previous)
+      setShowForm(true)
+    },
+    onSettled: () => queryClient.invalidateQueries({ queryKey: ['events'] }),
   })
 
   const updateEvent = useMutation({
@@ -86,7 +103,16 @@ export default function Dashboard() {
 
   const deleteEvent = useMutation({
     mutationFn: (id: number) => api.delete(`/events/${id}`),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['events'] }),
+    onMutate: async (id) => {
+      await queryClient.cancelQueries({ queryKey: ['events'] })
+      const previous = queryClient.getQueryData<Event[]>(['events'])
+      queryClient.setQueryData(['events'], (old: Event[] = []) => old.filter((e) => e.id !== id))
+      return { previous }
+    },
+    onError: (_, __, context) => {
+      if (context?.previous) queryClient.setQueryData(['events'], context.previous)
+    },
+    onSettled: () => queryClient.invalidateQueries({ queryKey: ['events'] }),
   })
 
   return (
