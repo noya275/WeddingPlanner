@@ -154,6 +154,11 @@ export default function Vendors() {
     },
   })
 
+  const reorderVendor = useMutation({
+    mutationFn: ({ id, sort_order }: { id: number; sort_order: number }) =>
+      api.patch(`/events/${eventId}/vendors/${id}`, { sort_order }),
+  })
+
   const createVendor = useMutation({
     mutationFn: (payload: object) =>
       api.post(`/events/${eventId}/vendors`, payload).then((r) => r.data),
@@ -239,7 +244,7 @@ export default function Vendors() {
     // Persist only changed rows
     reordered.forEach((v, idx) => {
       const newOrder = idx * 10
-      if (v.sort_order !== newOrder) updateVendor.mutate({ id: v.id, sort_order: newOrder })
+      if (v.sort_order !== newOrder) reorderVendor.mutate({ id: v.id, sort_order: newOrder })
     })
   }
 
