@@ -155,12 +155,50 @@ export default function Vendors() {
   const createVendor = useMutation({
     mutationFn: (payload: object) =>
       api.post(`/events/${eventId}/vendors`, payload).then((r) => r.data),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['vendors', eventId] }),
+    onMutate: async (payload) => {
+      const data = payload as Record<string, unknown>
+      await queryClient.cancelQueries({ queryKey: ['vendors', eventId] })
+      const previous = queryClient.getQueryData<Vendor[]>(['vendors', eventId])
+      const maxOrder = (previous ?? []).reduce((max, v) => Math.max(max, v.sort_order), 0)
+      const tempVendor: Vendor = {
+        id: -Date.now(),
+        event_id: Number(eventId),
+        name: data.name as string,
+        vendor_name: null,
+        category: (data.category as string) ?? null,
+        contact_name: null,
+        contact_email: null,
+        contact_phone: null,
+        price: null,
+        actual: null,
+        is_paid: false,
+        status: 'prospect',
+        sort_order: maxOrder + 1,
+        notes: null,
+      }
+      queryClient.setQueryData(['vendors', eventId], (old: Vendor[] = []) => [...old, tempVendor])
+      return { previous }
+    },
+    onError: (_, __, context) => {
+      if (context?.previous) queryClient.setQueryData(['vendors', eventId], context.previous)
+    },
+    onSettled: () => queryClient.invalidateQueries({ queryKey: ['vendors', eventId] }),
   })
 
   const updateVendor = useMutation({
     mutationFn: ({ id, ...data }: { id: number; name?: string; vendor_name?: string | null; category?: string | null; contact_name?: string | null; contact_phone?: string | null; actual?: number | null; is_paid?: boolean; sort_order?: number }) =>
       api.patch(`/events/${eventId}/vendors/${id}`, data).then((r) => r.data),
+    onMutate: async (patch) => {
+      await queryClient.cancelQueries({ queryKey: ['vendors', eventId] })
+      const previous = queryClient.getQueryData<Vendor[]>(['vendors', eventId])
+      queryClient.setQueryData(['vendors', eventId], (old: Vendor[] = []) =>
+        old.map((v) => (v.id === patch.id ? { ...v, ...patch } : v))
+      )
+      return { previous }
+    },
+    onError: (_, __, context) => {
+      if (context?.previous) queryClient.setQueryData(['vendors', eventId], context.previous)
+    },
     onSuccess: (updated: Vendor) => {
       queryClient.setQueryData(['vendors', eventId], (old: Vendor[] = []) =>
         old.map((v) => (v.id === updated.id ? updated : v))
@@ -170,7 +208,16 @@ export default function Vendors() {
 
   const deleteVendor = useMutation({
     mutationFn: (id: number) => api.delete(`/events/${eventId}/vendors/${id}`),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['vendors', eventId] }),
+    onMutate: async (id: number) => {
+      await queryClient.cancelQueries({ queryKey: ['vendors', eventId] })
+      const previous = queryClient.getQueryData<Vendor[]>(['vendors', eventId])
+      queryClient.setQueryData(['vendors', eventId], (old: Vendor[] = []) => old.filter((v) => v.id !== id))
+      return { previous }
+    },
+    onError: (_, __, context) => {
+      if (context?.previous) queryClient.setQueryData(['vendors', eventId], context.previous)
+    },
+    onSettled: () => queryClient.invalidateQueries({ queryKey: ['vendors', eventId] }),
   })
 
   function handleDragEnd(event: DragEndEvent, group: Vendor[], catName: string) {

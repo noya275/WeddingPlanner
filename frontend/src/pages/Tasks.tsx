@@ -47,12 +47,43 @@ const { data: tasks = [], isLoading } = useQuery<Task[]>({
   const createTask = useMutation({
     mutationFn: (payload: object) =>
       api.post(`/events/${eventId}/tasks`, payload).then((r) => r.data),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['tasks', eventId] }),
+    onMutate: async (payload) => {
+      const data = payload as Record<string, unknown>
+      await queryClient.cancelQueries({ queryKey: ['tasks', eventId] })
+      const previous = queryClient.getQueryData<Task[]>(['tasks', eventId])
+      const tempTask: Task = {
+        id: -Date.now(),
+        event_id: Number(eventId),
+        title: data.title as string,
+        status: (data.status as TaskStatus) ?? 'todo',
+        description: null,
+        assigned_to: null,
+        due_date: null,
+        category: null,
+      }
+      queryClient.setQueryData(['tasks', eventId], (old: Task[] = []) => [...old, tempTask])
+      return { previous }
+    },
+    onError: (_, __, context) => {
+      if (context?.previous) queryClient.setQueryData(['tasks', eventId], context.previous)
+    },
+    onSettled: () => queryClient.invalidateQueries({ queryKey: ['tasks', eventId] }),
   })
 
   const updateTask = useMutation({
     mutationFn: ({ id, ...data }: { id: number; title?: string; status?: TaskStatus; assigned_to?: string | null; due_date?: string | null; category?: string | null }) =>
       api.patch(`/events/${eventId}/tasks/${id}`, data).then((r) => r.data),
+    onMutate: async (patch) => {
+      await queryClient.cancelQueries({ queryKey: ['tasks', eventId] })
+      const previous = queryClient.getQueryData<Task[]>(['tasks', eventId])
+      queryClient.setQueryData(['tasks', eventId], (old: Task[] = []) =>
+        old.map((t) => (t.id === patch.id ? { ...t, ...patch } : t))
+      )
+      return { previous }
+    },
+    onError: (_, __, context) => {
+      if (context?.previous) queryClient.setQueryData(['tasks', eventId], context.previous)
+    },
     onSuccess: (updated: Task) => {
       queryClient.setQueryData(['tasks', eventId], (old: Task[] = []) =>
         old.map((t) => (t.id === updated.id ? updated : t))
@@ -62,7 +93,16 @@ const { data: tasks = [], isLoading } = useQuery<Task[]>({
 
   const deleteTask = useMutation({
     mutationFn: (id: number) => api.delete(`/events/${eventId}/tasks/${id}`),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['tasks', eventId] }),
+    onMutate: async (id: number) => {
+      await queryClient.cancelQueries({ queryKey: ['tasks', eventId] })
+      const previous = queryClient.getQueryData<Task[]>(['tasks', eventId])
+      queryClient.setQueryData(['tasks', eventId], (old: Task[] = []) => old.filter((t) => t.id !== id))
+      return { previous }
+    },
+    onError: (_, __, context) => {
+      if (context?.previous) queryClient.setQueryData(['tasks', eventId], context.previous)
+    },
+    onSettled: () => queryClient.invalidateQueries({ queryKey: ['tasks', eventId] }),
   })
 
   function moveTask(task: Task, direction: -1 | 1) {
