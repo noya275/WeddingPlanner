@@ -100,7 +100,6 @@ function SortableRow({
 
   const style: React.CSSProperties = {
     transform: CSS.Transform.toString(transform),
-    transition,
     opacity: isDragging ? 0.4 : 1,
     position: 'relative',
     zIndex: isDragging ? 1 : undefined,
