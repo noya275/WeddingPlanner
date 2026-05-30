@@ -1,6 +1,7 @@
 import { useState, useRef, Fragment } from 'react'
 import { useParams } from 'react-router-dom'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { keepPreviousData } from '@tanstack/react-query'
 import {
   DndContext,
   closestCenter,
@@ -141,6 +142,7 @@ export default function Vendors() {
     queryKey: ['vendors', eventId],
     queryFn: () => api.get(`/events/${eventId}/vendors`).then((r) => r.data),
     refetchInterval: 5000,
+    placeholderData: keepPreviousData,
   })
 
   const updateEventBudget = useMutation({
