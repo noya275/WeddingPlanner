@@ -234,11 +234,13 @@ export default function Vendors() {
     const newIndex = group.findIndex((v) => v.id === over.id)
     const reordered = arrayMove(group, oldIndex, newIndex)
 
-    // Optimistic update
-    queryClient.setQueryData(['vendors', eventId], (old: Vendor[] = []) => {
-      const others = old.filter((v) => v.category !== catName || (!KNOWN_CATEGORIES.has(v.category ?? '') && catName === 'Other'))
-      const updated = reordered.map((v, idx) => ({ ...v, sort_order: idx * 10 }))
-      return [...others, ...updated]
+    // Defer so dnd-kit cleans up its CSS transforms before React re-renders
+    requestAnimationFrame(() => {
+      queryClient.setQueryData(['vendors', eventId], (old: Vendor[] = []) => {
+        const others = old.filter((v) => v.category !== catName || (!KNOWN_CATEGORIES.has(v.category ?? '') && catName === 'Other'))
+        const updated = reordered.map((v, idx) => ({ ...v, sort_order: idx * 10 }))
+        return [...others, ...updated]
+      })
     })
 
     // Persist only changed rows
