@@ -174,7 +174,6 @@ export default function Vendors() {
         price: null,
         actual: null,
         is_paid: false,
-        status: 'prospect',
         sort_order: maxOrder + 1,
         notes: null,
       }

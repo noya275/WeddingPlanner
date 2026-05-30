@@ -1,15 +1,6 @@
-import enum
-from sqlalchemy import Column, Integer, String, ForeignKey, Enum, Numeric, Boolean
+from sqlalchemy import Column, Integer, String, ForeignKey, Numeric, Boolean
 from sqlalchemy.orm import relationship
 from ..database import Base
-
-
-class VendorStatus(str, enum.Enum):
-    """Booking lifecycle stages for a vendor."""
-    prospect = "prospect"
-    contacted = "contacted"
-    booked = "booked"
-    cancelled = "cancelled"
 
 
 class Vendor(Base):
@@ -27,7 +18,6 @@ class Vendor(Base):
     price = Column(Numeric(10, 2))
     actual = Column(Numeric(10, 2))
     is_paid = Column(Boolean, default=False)
-    status = Column(Enum(VendorStatus), default=VendorStatus.prospect)
     sort_order = Column(Integer, default=0)
     notes = Column(String)
 

@@ -1,6 +1,5 @@
 export type RSVPStatus = 'pending' | 'confirmed' | 'declined' | 'maybe'
 export type TaskStatus = 'todo' | 'in_progress' | 'done'
-export type VendorStatus = 'prospect' | 'contacted' | 'booked' | 'cancelled'
 
 export interface User {
   id: number
@@ -65,7 +64,6 @@ export interface Vendor {
   price: number | null
   actual: number | null
   is_paid: boolean
-  status: VendorStatus
   sort_order: number
   notes: string | null
 }
