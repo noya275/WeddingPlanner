@@ -270,7 +270,7 @@ export default function SeatingChart() {
             backgroundSize: '32px 32px',
           }}
         >
-          <div className="grid grid-cols-2 lg:grid-cols-3 gap-6 justify-items-center">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 justify-items-center">
             {tables.map((n) => (
               <TableZone
                 key={n}
