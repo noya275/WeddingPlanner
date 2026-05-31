@@ -46,6 +46,7 @@ export default function EditableCell({ value, onSave, type = 'text', placeholder
         onChange={e => setVal(e.target.value)}
         onBlur={commit}
         onKeyDown={handleKey}
+        name="editable-field"
         autoComplete="off"
         placeholder={placeholder}
         className="w-full bg-white border border-burgundy-400 rounded px-2 py-0.5 text-sm focus:outline-none focus:ring-2 focus:ring-burgundy-500"

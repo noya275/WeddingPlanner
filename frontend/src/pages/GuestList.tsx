@@ -46,6 +46,7 @@ function AddRow({ onAdd }: { onAdd: (name: string, phone: string) => void }) {
           onKeyDown={(e) => {
             if (e.key === 'Enter') { e.preventDefault(); phoneRef.current?.focus() }
           }}
+          name="guest-name"
           autoComplete="off"
           placeholder="+ Add guest..."
           className="w-full text-sm outline-none bg-transparent guest-add-input text-gray-700"
@@ -58,6 +59,7 @@ function AddRow({ onAdd }: { onAdd: (name: string, phone: string) => void }) {
           onChange={(e) => setPhone(e.target.value)}
           onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); submit() } }}
           onBlur={() => { if (name.trim()) submit() }}
+          name="guest-phone"
           autoComplete="off"
           placeholder="phone"
           className="w-full text-sm outline-none bg-transparent guest-add-input text-gray-700"
@@ -114,6 +116,7 @@ function SideTable({ title, emoji, guests, onUpdate, onDelete, onSendRSVP, onAdd
                 <select
                   value={guest.rsvp_status}
                   onChange={(e) => onUpdate({ id: guest.id, rsvp_status: e.target.value as RSVPStatus })}
+                  name="rsvp_status"
                   autoComplete="off"
                   className={`text-sm font-medium px-2 py-1 rounded-full border-0 cursor-pointer ${STATUS_COLORS[guest.rsvp_status]}`}
                 >
@@ -324,6 +327,7 @@ export default function GuestList() {
         <input
           value={search}
           onChange={(e) => setSearch(e.target.value)}
+          name="search"
           autoComplete="off"
           placeholder="Search guests..."
           className="border border-gray-200 rounded-lg px-3 py-1.5 text-sm bg-white/50 focus:outline-none focus:ring-2 focus:ring-burgundy-400 w-48"
