@@ -164,29 +164,37 @@ export default function Dashboard() {
                 className="bg-white border border-gray-200 rounded-2xl p-6 hover:shadow-md transition-shadow"
               >
                 <div className="flex justify-between items-center">
-                  <Link to={`/events/${event.id}/guests`} className="flex-1 min-w-0 mr-4">
-                    <h2 className="font-bold text-gray-900 text-2xl leading-tight hover:text-burgundy-700 transition-colors">
-                      {event.title}
-                    </h2>
-                  </Link>
-                  <div className="flex gap-1 shrink-0">
-                    <button
-                      onClick={() => setEditingId(event.id)}
-                      style={{ color: '#7a6a60' }}
-                      className="hover:text-burgundy-600 text-2xl px-2 py-1 transition-colors"
-                      title="Edit event"
-                    >
-                      ✎
-                    </button>
-                    <button
-                      onClick={() => { if (window.confirm(`Delete "${event.title}"? This cannot be undone.`)) deleteEvent.mutate(event.id) }}
-                      style={{ color: '#7a6a60' }}
-                      className="hover:text-red-500 text-2xl leading-none px-1 transition-colors"
-                      title="Delete event"
-                    >
-                      ×
-                    </button>
-                  </div>
+                  {event.id > 0 ? (
+                    <Link to={`/events/${event.id}/guests`} className="flex-1 min-w-0 mr-4">
+                      <h2 className="font-bold text-gray-900 text-2xl leading-tight hover:text-burgundy-700 transition-colors">
+                        {event.title}
+                      </h2>
+                    </Link>
+                  ) : (
+                    <div className="flex-1 min-w-0 mr-4">
+                      <h2 className="font-bold text-gray-400 text-2xl leading-tight">{event.title}</h2>
+                    </div>
+                  )}
+                  {event.id > 0 && (
+                    <div className="flex gap-1 shrink-0">
+                      <button
+                        onClick={() => setEditingId(event.id)}
+                        style={{ color: '#7a6a60' }}
+                        className="hover:text-burgundy-600 text-2xl px-2 py-1 transition-colors"
+                        title="Edit event"
+                      >
+                        ✎
+                      </button>
+                      <button
+                        onClick={() => { if (window.confirm(`Delete "${event.title}"? This cannot be undone.`)) deleteEvent.mutate(event.id) }}
+                        style={{ color: '#7a6a60' }}
+                        className="hover:text-red-500 text-2xl leading-none px-1 transition-colors"
+                        title="Delete event"
+                      >
+                        ×
+                      </button>
+                    </div>
+                  )}
                 </div>
               </div>
             )
