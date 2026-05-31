@@ -332,8 +332,7 @@ export default function GuestList() {
         ))}
       </div>
 
-      <div className="flex items-center justify-between mb-4">
-        <p className="text-base font-bold text-gray-500">{guests.length} guests total</p>
+      <div className="flex items-center justify-end mb-4">
         <input
           value={search}
           onChange={(e) => setSearch(e.target.value)}
