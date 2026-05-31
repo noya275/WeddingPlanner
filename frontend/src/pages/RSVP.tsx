@@ -53,7 +53,7 @@ export default function RSVPPage() {
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
         <div className="text-center">
           <p className="text-2xl mb-2">😕</p>
-          <p className="text-gray-600 font-medium">This RSVP link is invalid or has expired.</p>
+          <p className="text-gray-600 font-medium">הקישור אינו תקין או שפג תוקפו.</p>
         </div>
       </div>
     )
