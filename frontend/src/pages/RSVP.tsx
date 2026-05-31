@@ -40,20 +40,22 @@ export default function RSVPPage() {
     onSuccess: (_, status) => setSubmittedStatus(status),
   })
 
+  const bgStyle = { backgroundImage: 'url(/RedBG.webp)', backgroundSize: 'cover', backgroundPosition: 'center', backgroundAttachment: 'fixed' }
+
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <p className="text-gray-400">Loading...</p>
+      <div className="min-h-screen flex items-center justify-center" style={bgStyle}>
+        <p className="text-white/70">Loading...</p>
       </div>
     )
   }
 
   if (isError || !data) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+      <div className="min-h-screen flex items-center justify-center" style={bgStyle}>
         <div className="text-center">
           <p className="text-2xl mb-2">😕</p>
-          <p className="text-gray-600 font-medium">הקישור אינו תקין או שפג תוקפו.</p>
+          <p className="text-white font-medium">הקישור אינו תקין או שפג תוקפו.</p>
         </div>
       </div>
     )
@@ -62,8 +64,8 @@ export default function RSVPPage() {
   if (submittedStatus) {
     const { emoji, title, body } = THANK_YOU[submittedStatus]
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <div className="max-w-sm w-full mx-4 text-center" dir="rtl">
+      <div className="min-h-screen flex items-center justify-center px-4" style={bgStyle}>
+        <div className="max-w-sm w-full bg-white rounded-2xl shadow-sm border border-gray-200 p-8 text-center" dir="rtl">
           <div className="text-5xl mb-4">{emoji}</div>
           <h1 className="text-2xl font-bold text-gray-900 mb-2">{title}</h1>
           <p className="text-gray-500">{body(data.event_title)}</p>
@@ -73,7 +75,7 @@ export default function RSVPPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
+    <div className="min-h-screen flex items-center justify-center px-4" style={bgStyle}>
       <div className="max-w-sm w-full">
         <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-8 text-center" dir="rtl">
           <h1 className="text-2xl font-bold text-gray-900 mb-1">הנכם מוזמנים ל{data.event_title} 💍</h1>
@@ -101,12 +103,12 @@ export default function RSVPPage() {
                 disabled={submit.isPending}
                 className="w-full bg-orange-50 text-orange-600 border border-orange-200 py-3 rounded-xl font-semibold text-sm hover:bg-orange-100 transition-colors disabled:opacity-50"
               >
-                🤔 עדיין לא בטוחים
+                עדיין לא בטוחים 🤔
               </button>
               <button
                 onClick={() => submit.mutate('declined')}
                 disabled={submit.isPending}
-                className="w-full bg-gray-100 text-gray-600 py-3 rounded-xl font-semibold text-sm hover:bg-gray-200 transition-colors disabled:opacity-50"
+                className="w-full bg-rose-50 text-rose-700 border border-rose-200 py-3 rounded-xl font-semibold text-sm hover:bg-rose-100 transition-colors disabled:opacity-50"
               >
                 ✕ לצערנו לא נוכל להגיע
               </button>
