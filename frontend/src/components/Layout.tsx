@@ -1,10 +1,18 @@
 import { Link, Outlet, useNavigate, useLocation } from 'react-router-dom'
-import { clearToken } from '../api/client'
+import { useQuery } from '@tanstack/react-query'
+import api, { clearToken } from '../api/client'
+import type { User } from '../api/types'
 
 /** Top-level authenticated shell: renders the global nav bar with a logout button and an Outlet for nested routes. */
 export default function Layout() {
   const navigate = useNavigate()
   const location = useLocation()
+
+  const { data: user } = useQuery<User>({
+    queryKey: ['me'],
+    queryFn: () => api.get('/auth/me').then((r) => r.data),
+    staleTime: Infinity,
+  })
 
   function logout() {
     clearToken()
@@ -22,12 +30,19 @@ export default function Layout() {
             <Link to="/" className="text-xl font-semibold tracking-tight text-amber-100" style={{ fontFamily: 'Georgia, "Times New Roman", serif' }}>
               Wedding Planner
             </Link>
-            <button
-              onClick={logout}
-              className="text-sm transition-colors" style={{ color: 'rgba(255,235,210,0.9)' }}
-            >
-              Logout
-            </button>
+            <div className="flex items-center gap-4">
+              {user && (
+                <span className="text-sm" style={{ color: 'rgba(255,235,210,0.75)' }}>
+                  Hi, {user.name} <span className="mx-2 opacity-40">|</span> {user.email}
+                </span>
+              )}
+              <button
+                onClick={logout}
+                className="text-sm transition-colors" style={{ color: 'rgba(255,235,210,0.9)' }}
+              >
+                Logout
+              </button>
+            </div>
           </div>
         </div>
       </nav>
