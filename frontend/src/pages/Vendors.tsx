@@ -76,6 +76,7 @@ function AddRow({ onAdd, category }: { onAdd: (name: string, category: string) =
           onChange={(e) => setName(e.target.value)}
           onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); submit() } }}
           onBlur={() => { if (name.trim()) submit() }}
+          autoComplete="off"
           placeholder="+ Add vendor..."
           className="w-full text-sm outline-none bg-transparent text-gray-700 guest-add-input"
         />
@@ -333,6 +334,7 @@ export default function Vendors() {
             <input
               type="number" value={budgetInput}
               onChange={(e) => setBudgetInput(e.target.value)}
+              autoComplete="off"
               placeholder="Total budget" min="0" step="1"
               className="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-burgundy-500 w-48"
             />

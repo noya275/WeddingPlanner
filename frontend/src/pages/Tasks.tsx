@@ -28,6 +28,7 @@ function AddTaskRow({ onAdd }: { onAdd: (title: string) => void }) {
         onChange={(e) => setValue(e.target.value)}
         onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); submit() } }}
         onBlur={submit}
+        autoComplete="off"
         placeholder="+ Add task..."
         className="w-full text-sm outline-none bg-transparent text-gray-700 guest-add-input px-1 py-1"
       />

@@ -45,6 +45,8 @@ export default function Register() {
             <div>
               <label className="block text-sm font-medium text-white/80 mb-1">Name</label>
               <input
+                id="name"
+                name="name"
                 type="text"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
@@ -55,6 +57,8 @@ export default function Register() {
             <div>
               <label className="block text-sm font-medium text-white/80 mb-1">Email</label>
               <input
+                id="email"
+                name="email"
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
@@ -65,6 +69,8 @@ export default function Register() {
             <div>
               <label className="block text-sm font-medium text-white/80 mb-1">Password</label>
               <input
+                id="password"
+                name="password"
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}

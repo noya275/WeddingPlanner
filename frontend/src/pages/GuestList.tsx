@@ -46,6 +46,7 @@ function AddRow({ onAdd }: { onAdd: (name: string, phone: string) => void }) {
           onKeyDown={(e) => {
             if (e.key === 'Enter') { e.preventDefault(); phoneRef.current?.focus() }
           }}
+          autoComplete="off"
           placeholder="+ Add guest..."
           className="w-full text-sm outline-none bg-transparent guest-add-input text-gray-700"
         />
@@ -57,6 +58,7 @@ function AddRow({ onAdd }: { onAdd: (name: string, phone: string) => void }) {
           onChange={(e) => setPhone(e.target.value)}
           onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); submit() } }}
           onBlur={() => { if (name.trim()) submit() }}
+          autoComplete="off"
           placeholder="phone"
           className="w-full text-sm outline-none bg-transparent guest-add-input text-gray-700"
         />
@@ -321,6 +323,7 @@ export default function GuestList() {
         <input
           value={search}
           onChange={(e) => setSearch(e.target.value)}
+          autoComplete="off"
           placeholder="Search guests..."
           className="border border-gray-200 rounded-lg px-3 py-1.5 text-sm bg-white/50 focus:outline-none focus:ring-2 focus:ring-burgundy-400 w-48"
         />
