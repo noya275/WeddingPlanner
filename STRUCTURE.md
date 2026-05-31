@@ -33,7 +33,7 @@ The backend is a Python web server. Its only job is to receive HTTP requests fro
 | `app/database.py` | Sets up the connection to the database. Creates the SQLAlchemy "engine" (the connection), the "session" (a temporary workspace for reading/writing), and the "Base" class that all models inherit from. The `get_db` function is a FastAPI dependency that opens a session for each request and closes it when done. |
 | `app/deps.py` | Contains two reusable functions that protect routes: `get_current_user` reads the JWT token from the request header, decodes it, and returns the logged-in user (or raises a 401 if invalid). `get_event_or_404` checks that the requested event exists AND belongs to the current user (or raises a 404). Every protected route uses these. |
 | `app/core/config.py` | Reads environment variables (like `DATABASE_URL` and `SECRET_KEY`) from the `.env` file and exposes them as a typed Python object called `settings`. This means the rest of the app can do `settings.SECRET_KEY` instead of `os.environ.get(...)` everywhere. |
-| `app/core/security.py` | Contains all the security logic: hashing passwords with bcrypt before storing them, verifying a plain password against a stored hash on login, creating JWTs (the tokens given to users after login), and decoding/validating JWTs on each request. |
+| `app/core/security.py` | Contains all the security logic: hashing passwords with bcrypt before storing them, verifying a plain password against a stored hash on login, creating JWTs (the tokens given to users after login), and decoding/validating JWTs on each request. A JWT (JSON Web Token) is a signed string the server gives the user after login. The frontend stores it in localStorage and sends it with every request. The server decodes it to know who the user is — no session or cookie needed. |
 | `backend/.env` | A local-only file containing secret values: the database URL, the JWT secret key, etc. Never committed to git. Each developer has their own. Render has its own copy in the dashboard. |
 | `backend/.env.example` | A safe template version of `.env` with placeholder values. Committed to git so new developers know what variables they need to set up. |
 | `backend/Dockerfile` | Instructions for building a Docker container image of the backend. Render uses this to package and run the app in a consistent environment. |
@@ -52,7 +52,11 @@ Models define the shape of the database. Each model is a Python class that maps 
 
 ### Schemas (`app/schemas/`)
 
-Schemas are separate from models. While models define how data is stored in the database, schemas define the shape of data going into and out of the API as JSON. FastAPI uses schemas to automatically validate incoming requests (rejecting bad data before it reaches your code) and to format outgoing responses. Each resource typically has three schemas: one for creating, one for updating, one for the response.
+Schemas are separate from models. While models define how data is stored in the database, schemas define the shape of data going into and out of the API as JSON. They are written using **Pydantic** — a Python library that validates data automatically. FastAPI integrates with Pydantic so that when a request arrives, the body is validated against the schema before your code even runs. If a required field is missing or has the wrong type, FastAPI returns a 422 error automatically.
+
+The key reason models and schemas are separate is that **what you store and what you expose aren't always the same**. For example: the `users` table stores a `password_hash` column — but `UserOut` (the response schema) deliberately doesn't include it, so the hash is never sent to the frontend. Similarly, `EventCreate` only requires a `title` — fields like `id`, `created_at`, and `user_id` are assigned by the server and don't need to come from the user.
+
+Each resource follows the same three-schema pattern: `XCreate` (what the frontend sends to create), `XUpdate` (what the frontend sends to edit — all fields optional), `XOut` (what the API returns).
 
 | File | Purpose |
 |------|---------|
@@ -61,6 +65,19 @@ Schemas are separate from models. While models define how data is stored in the 
 | `guest.py` | `GuestCreate` — minimum fields to add a guest. `GuestUpdate` — all fields optional for editing. `GuestOut` — full guest object returned to the frontend. `RSVPUpdate` — the specific schema used by the public RSVP page. |
 | `task.py` | `TaskCreate`, `TaskUpdate`, `TaskOut` — same pattern as above for tasks. |
 | `vendor.py` | `VendorCreate`, `VendorUpdate`, `VendorOut` — same pattern for vendors. |
+
+### How a request flows through the backend
+
+When the frontend does something like "add a guest", this is the exact sequence:
+
+1. **Frontend** sends `POST /events/3/guests` with `{ "name": "Sarah", "phone": "054..." }` and the JWT token in the header
+2. **`deps.py` → `get_current_user`** decodes the JWT token and returns the logged-in user. If the token is missing or expired, returns 401 immediately.
+3. **`deps.py` → `get_event_or_404`** checks that event 3 exists AND belongs to this user. If not, returns 404.
+4. **Schema (`GuestCreate`)** validates the request body via Pydantic — is `name` present? Are types correct? If not, returns 422 automatically.
+5. **Router (`guests.py`)** runs the function body — creates a `Guest(...)` model object and saves it to the database.
+6. **Schema (`GuestOut`)** formats the saved guest as JSON (excluding any internal fields) and sends it back as the response.
+
+This pattern applies to every endpoint in the app.
 
 ### Routers (`app/routers/`)
 
@@ -79,7 +96,9 @@ Routers contain the actual endpoint logic — what happens when the frontend cal
 
 ## Frontend (`frontend/`)
 
-The frontend is a React application — a collection of components that render HTML in the browser. It communicates with the backend via HTTP requests (using Axios), caches and syncs server data (using React Query), and handles navigation between pages (using React Router). Vite is the tool that bundles all the TypeScript/React code into plain JavaScript that browsers can run.
+The frontend is a React application — a collection of components that render HTML in the browser. It communicates with the backend via HTTP requests (using **Axios**), caches and syncs server data (using **React Query**), and handles navigation between pages (using **React Router**). **Vite** is the tool that bundles all the TypeScript/React code into plain JavaScript that browsers can run.
+
+**React Query** is worth understanding specifically: it manages all the data fetching. When a page needs data (e.g. the guest list), React Query fetches it, caches it, and re-fetches it on a 5-second interval to stay fresh. It also handles **optimistic updates** — when you add a guest, it immediately shows the guest in the UI (using a temporary fake ID) before the server responds. If the server fails, it rolls back to the previous state. This makes the app feel instant even over a slow connection.
 
 ### Config Files
 
