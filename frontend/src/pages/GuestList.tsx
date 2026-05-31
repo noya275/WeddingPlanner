@@ -316,8 +316,9 @@ export default function GuestList() {
         <h1 className="text-2xl font-bold text-gray-900">Guest List</h1>
       </div>
 
-      <div className="grid grid-cols-5 gap-4 mb-6">
+      <div className="grid grid-cols-6 gap-4 mb-6">
         {[
+          { label: 'Total Invited', count: guests.length, color: 'text-gray-700' },
           { label: 'Confirmed', count: confirmed, color: 'text-[#5cb87a]' },
           { label: 'Pending', count: pending, color: 'text-yellow-400' },
           { label: 'Maybe', count: maybe, color: 'text-orange-500' },
