@@ -160,12 +160,19 @@ export default function SeatingChart() {
   const [tableCount, setTableCount] = useState(8)
   const [capacity, setCapacity] = useState(10)
   const [activeGuest, setActiveGuest] = useState<Guest | null>(null)
-  const [doneTables, setDoneTables] = useState<Set<number>>(new Set())
+  const storageKey = `doneTables-${eventId}`
+  const [doneTables, setDoneTables] = useState<Set<number>>(() => {
+    try {
+      const saved = localStorage.getItem(storageKey)
+      return saved ? new Set<number>(JSON.parse(saved)) : new Set<number>()
+    } catch { return new Set<number>() }
+  })
 
   function toggleDone(n: number) {
     setDoneTables((prev) => {
       const next = new Set(prev)
       if (next.has(n)) next.delete(n); else next.add(n)
+      localStorage.setItem(storageKey, JSON.stringify([...next]))
       return next
     })
   }
