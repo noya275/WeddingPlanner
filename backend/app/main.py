@@ -1,33 +1,10 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from sqlalchemy import text
 from .database import Base, engine
 from .core.config import settings
 from .routers import auth, events, guests, tasks, vendors, public
 
-# Columns added after initial schema — safe to run on every startup (errors are swallowed)
-_MIGRATIONS = [
-    "ALTER TABLE guests ADD COLUMN side VARCHAR",
-    "ALTER TABLE vendors ADD COLUMN actual NUMERIC(10,2)",
-    "ALTER TABLE vendors ADD COLUMN is_paid BOOLEAN DEFAULT FALSE",
-    "ALTER TABLE events ADD COLUMN budget_total NUMERIC(12,2)",
-    "ALTER TABLE guests ADD COLUMN rsvp_token VARCHAR",
-    "ALTER TABLE guests ADD COLUMN rsvp_sent BOOLEAN DEFAULT 0",
-]
-
-
-def run_migrations() -> None:
-    with engine.connect() as conn:
-        for stmt in _MIGRATIONS:
-            try:
-                conn.execute(text(stmt))
-                conn.commit()
-            except Exception:
-                pass
-
-
 Base.metadata.create_all(bind=engine)
-run_migrations()
 
 app = FastAPI(title="Wedding Planner API", version="1.0.0")
 
