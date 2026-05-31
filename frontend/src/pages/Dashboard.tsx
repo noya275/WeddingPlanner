@@ -39,12 +39,20 @@ function EventForm({
         placeholder="Event name"
         className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-burgundy-500"
       />
-      <input
-        type="date"
-        value={date}
-        onChange={(e) => setDate(e.target.value)}
-        className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-600 focus:outline-none focus:ring-2 focus:ring-burgundy-500"
-      />
+      <div className="flex items-center gap-2">
+        <input
+          type="date"
+          value={date}
+          onChange={(e) => setDate(e.target.value)}
+          className="flex-1 border border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-600 focus:outline-none focus:ring-2 focus:ring-burgundy-500"
+        />
+        {date && (
+          <button type="button" onClick={() => setDate('')} className="text-gray-400 hover:text-gray-600 text-sm">
+            Clear
+          </button>
+        )}
+        {!date && <span className="text-xs text-gray-400 shrink-0">optional</span>}
+      </div>
       <div className="flex gap-2">
         <button
           type="submit"
