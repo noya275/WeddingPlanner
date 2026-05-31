@@ -114,6 +114,7 @@ function SideTable({ title, emoji, guests, onUpdate, onDelete, onSendRSVP, onAdd
                 <select
                   value={guest.rsvp_status}
                   onChange={(e) => onUpdate({ id: guest.id, rsvp_status: e.target.value as RSVPStatus })}
+                  autoComplete="off"
                   className={`text-sm font-medium px-2 py-1 rounded-full border-0 cursor-pointer ${STATUS_COLORS[guest.rsvp_status]}`}
                 >
                   <option value="pending">Pending</option>

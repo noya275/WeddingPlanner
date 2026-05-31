@@ -230,12 +230,14 @@ export default function SeatingChart() {
             Tables:
             <input type="number" min={1} max={30} value={tableCount}
               onChange={(e) => setTableCount(Math.max(1, parseInt(e.target.value) || 1))}
+              autoComplete="off"
               className="w-14 border border-[#d4b896] rounded-lg px-2 py-1 text-center bg-white/60 focus:outline-none focus:ring-2 focus:ring-burgundy-400" />
           </label>
           <label className="flex items-center gap-2 text-gray-600 font-semibold">
             Seats/table:
             <input type="number" min={1} max={30} value={capacity}
               onChange={(e) => setCapacity(Math.max(1, parseInt(e.target.value) || 1))}
+              autoComplete="off"
               className="w-14 border border-[#d4b896] rounded-lg px-2 py-1 text-center bg-white/60 focus:outline-none focus:ring-2 focus:ring-burgundy-400" />
           </label>
         </div>
