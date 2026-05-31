@@ -33,7 +33,7 @@ export default function Layout() {
             <div className="flex items-center gap-4">
               {user && (
                 <span className="text-sm" style={{ color: 'rgba(255,235,210,0.75)' }}>
-                  Hi, {user.name} <span className="mx-2 opacity-40">|</span> {user.email}
+                  Hi, {user.name}<span className="hidden sm:inline"><span className="mx-2 opacity-40">|</span>{user.email}</span>
                 </span>
               )}
               <button

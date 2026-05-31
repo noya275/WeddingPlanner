@@ -83,7 +83,7 @@ function SideTable({ title, emoji, guests, onUpdate, onDelete, onSendRSVP, onAdd
   ensureTokenId: number | null
 }) {
   return (
-    <div className="bg-white border border-gray-200 rounded-xl overflow-hidden">
+    <div className="bg-white border border-gray-200 rounded-xl overflow-x-auto">
       <div className="px-4 py-3 border-b border-gray-200 flex items-center justify-between">
         <h2 className="font-semibold text-gray-900">{emoji} {title}</h2>
         <span className="text-base font-bold text-gray-500">{guests.length} guests</span>
@@ -316,7 +316,7 @@ export default function GuestList() {
         <h1 className="text-2xl font-bold text-gray-900">Guest List</h1>
       </div>
 
-      <div className="grid grid-cols-6 gap-4 mb-6">
+      <div className="grid grid-cols-3 sm:grid-cols-6 gap-3 mb-6">
         {[
           { label: 'Total Invited', count: guests.length, color: 'text-gray-700' },
           { label: 'Confirmed', count: confirmed, color: 'text-[#5cb87a]' },

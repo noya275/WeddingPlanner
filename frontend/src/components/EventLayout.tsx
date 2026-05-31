@@ -21,47 +21,74 @@ export default function EventLayout() {
   })
 
   return (
-    <div className="flex gap-6 items-start">
-      {/* Sidebar */}
-      <aside style={{ width: 240, flexShrink: 0 }}>
-        <div className="bg-white border border-gray-200 rounded-2xl p-5 sticky top-8">
-          <Link to="/" className="text-base font-bold text-gray-400 hover:text-gray-600 mb-4 block transition-colors">
-            ← Events
-          </Link>
-          <h2 className="font-bold text-gray-900 text-xl leading-tight mb-1">{event?.title ?? '…'}</h2>
-          {event?.date && (
-            <p className="text-xs text-gray-400 mt-0.5">
-              {new Date(event.date + 'T00:00:00').toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })}
-            </p>
-          )}
-
-          <div className="border-t border-gray-100 mt-4 pt-4 space-y-1">
-            {NAV_ITEMS.map(({ label, path, icon, gray, text }) => (
-              <NavLink
-                key={path}
-                to={`/events/${eventId}/${path}`}
-                className={({ isActive }) =>
-                  `flex items-center gap-3 px-3 py-2.5 rounded-xl text-lg font-medium transition-colors
-                  ${isActive ? 'bg-burgundy-50 text-burgundy-700' : 'text-gray-600 hover:bg-gray-50'}`
-                }
-              >
-                <span
-                  style={{
-                    ...(gray ? { filter: 'grayscale(1)' } : {}),
-                    ...(text ? { color: '#555' } : {}),
-                  }}
-                >
-                  {icon}
-                </span>
-                {label}
-              </NavLink>
-            ))}
+    <div>
+      {/* Mobile top bar */}
+      <div className="lg:hidden bg-white border border-gray-200 rounded-2xl p-4 mb-4">
+        <div className="flex items-center justify-between mb-3">
+          <Link to="/" className="text-sm font-bold text-gray-400 hover:text-gray-600 transition-colors">← Events</Link>
+          <div className="text-right">
+            <p className="font-bold text-gray-900 text-base leading-tight">{event?.title ?? '…'}</p>
+            {event?.date && (
+              <p className="text-xs text-gray-400">
+                {new Date(event.date + 'T00:00:00').toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })}
+              </p>
+            )}
           </div>
         </div>
-      </aside>
+        <div className="flex gap-1 overflow-x-auto">
+          {NAV_ITEMS.map(({ label, path, icon, gray, text }) => (
+            <NavLink
+              key={path}
+              to={`/events/${eventId}/${path}`}
+              className={({ isActive }) =>
+                `flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm font-medium whitespace-nowrap transition-colors
+                ${isActive ? 'bg-burgundy-50 text-burgundy-700' : 'text-gray-600 hover:bg-gray-50'}`
+              }
+            >
+              <span style={{ ...(gray ? { filter: 'grayscale(1)' } : {}), ...(text ? { color: '#555' } : {}) }}>{icon}</span>
+              {label}
+            </NavLink>
+          ))}
+        </div>
+      </div>
 
-      {/* Page content */}
-      <div className="flex-1 min-w-0">
+      {/* Desktop sidebar layout */}
+      <div className="hidden lg:flex gap-6 items-start">
+        <aside style={{ width: 240, flexShrink: 0 }}>
+          <div className="bg-white border border-gray-200 rounded-2xl p-5 sticky top-8">
+            <Link to="/" className="text-base font-bold text-gray-400 hover:text-gray-600 mb-4 block transition-colors">
+              ← Events
+            </Link>
+            <h2 className="font-bold text-gray-900 text-xl leading-tight mb-1">{event?.title ?? '…'}</h2>
+            {event?.date && (
+              <p className="text-xs text-gray-400 mt-0.5">
+                {new Date(event.date + 'T00:00:00').toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })}
+              </p>
+            )}
+            <div className="border-t border-gray-100 mt-4 pt-4 space-y-1">
+              {NAV_ITEMS.map(({ label, path, icon, gray, text }) => (
+                <NavLink
+                  key={path}
+                  to={`/events/${eventId}/${path}`}
+                  className={({ isActive }) =>
+                    `flex items-center gap-3 px-3 py-2.5 rounded-xl text-lg font-medium transition-colors
+                    ${isActive ? 'bg-burgundy-50 text-burgundy-700' : 'text-gray-600 hover:bg-gray-50'}`
+                  }
+                >
+                  <span style={{ ...(gray ? { filter: 'grayscale(1)' } : {}), ...(text ? { color: '#555' } : {}) }}>{icon}</span>
+                  {label}
+                </NavLink>
+              ))}
+            </div>
+          </div>
+        </aside>
+        <div className="flex-1 min-w-0">
+          <Outlet />
+        </div>
+      </div>
+
+      {/* Mobile page content */}
+      <div className="lg:hidden">
         <Outlet />
       </div>
     </div>
