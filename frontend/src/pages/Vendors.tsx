@@ -213,24 +213,31 @@ export default function Vendors() {
     onSettled: () => queryClient.invalidateQueries({ queryKey: ['vendors', eventId] }),
   })
 
-  function handleDragEnd(event: DragEndEvent, group: Vendor[], catName: string) {
+  function handleDragEnd(event: DragEndEvent) {
     const { active, over } = event
     if (!over || active.id === over.id) return
+
+    const activeVendor = vendors.find((v) => v.id === active.id)
+    const overVendor = vendors.find((v) => v.id === over.id)
+    if (!activeVendor || !overVendor || activeVendor.category !== overVendor.category) return
+
+    const catName = activeVendor.category
+    const group = catName && KNOWN_CATEGORIES.has(catName)
+      ? vendorsByCategory[catName] ?? []
+      : otherVendors
 
     const oldIndex = group.findIndex((v) => v.id === active.id)
     const newIndex = group.findIndex((v) => v.id === over.id)
     const reordered = arrayMove(group, oldIndex, newIndex)
 
-    // Defer so dnd-kit cleans up its CSS transforms before React re-renders
     requestAnimationFrame(() => {
       queryClient.setQueryData(['vendors', eventId], (old: Vendor[] = []) => {
-        const others = old.filter((v) => v.category !== catName || (!KNOWN_CATEGORIES.has(v.category ?? '') && catName === 'Other'))
+        const others = old.filter((v) => v.category !== catName || (!KNOWN_CATEGORIES.has(v.category ?? '') && catName !== null))
         const updated = reordered.map((v, idx) => ({ ...v, sort_order: idx * 10 }))
         return [...others, ...updated]
       })
     })
 
-    // Persist only changed rows
     reordered.forEach((v, idx) => {
       const newOrder = idx * 10
       if (v.sort_order !== newOrder) reorderVendor.mutate({ id: v.id, sort_order: newOrder })
@@ -253,8 +260,7 @@ export default function Vendors() {
     const ids = catVendors.map((v) => v.id)
 
     return (
-      <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={(e) => handleDragEnd(e, catVendors, catName)}>
-        <SortableContext items={ids} strategy={verticalListSortingStrategy}>
+      <SortableContext items={ids} strategy={verticalListSortingStrategy}>
           <tr className="border-t-2 border-gray-200">
             <td className="w-6" />
             <td className="w-28 px-3 py-2 text-xs font-bold uppercase tracking-wider border-r border-gray-200 text-burgundy-700 bg-gray-50">
@@ -300,7 +306,6 @@ export default function Vendors() {
             </SortableRow>
           ))}
         </SortableContext>
-      </DndContext>
     )
   }
 
@@ -373,6 +378,7 @@ export default function Vendors() {
       {isLoading ? (
         <p className="text-gray-500">Loading...</p>
       ) : (
+        <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
         <div className="bg-white border border-gray-200 rounded-xl overflow-hidden">
           <table className="w-full text-sm">
             <thead className="bg-gray-50 text-gray-500 text-xs uppercase tracking-wide border-b border-gray-200">
@@ -404,6 +410,7 @@ export default function Vendors() {
             </tbody>
           </table>
         </div>
+        </DndContext>
       )}
     </div>
   )
