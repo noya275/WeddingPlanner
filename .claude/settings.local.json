@@ -32,7 +32,10 @@
       "Bash(npx playwright *)",
       "Bash(python3 -m playwright install chromium)",
       "Bash(pip3 install *)",
-      "Bash(cd *)"
+      "Bash(cd *)",
+      "Bash(.venv/bin/python -c ' *)",
+      "Bash(sqlite3 \"/Users/noya/Downloads/Personal/Personal Projects/WeddingPlanner/backend/wedding_planner.db\" \"SELECT id, email, name FROM users;\")",
+      "Bash(sqlite3 *)"
     ]
   }
 }
