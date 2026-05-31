@@ -9,6 +9,7 @@ interface Props {
   bold?: boolean
 }
 
+/** Displays a value as styled text; clicking switches it to an inline input that saves on Enter or blur and cancels on Escape. */
 export default function EditableCell({ value, onSave, type = 'text', placeholder = '—', emptyDisplay = '—', bold = false }: Props) {
   const [editing, setEditing] = useState(false)
   const [val, setVal] = useState(value != null ? String(value) : '')

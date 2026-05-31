@@ -14,10 +14,12 @@ import { getToken } from './api/client'
 
 const queryClient = new QueryClient()
 
+/** Redirects unauthenticated users to /login; renders children when a token is present. */
 function PrivateRoute({ children }: { children: React.ReactNode }) {
   return getToken() ? <>{children}</> : <Navigate to="/login" replace />
 }
 
+/** Root component: wraps the app in React Query and React Router, declares all routes. */
 export default function App() {
   return (
     <QueryClientProvider client={queryClient}>

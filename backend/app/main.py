@@ -1,3 +1,4 @@
+"""Entry point for the Wedding Planner FastAPI application: creates the app, configures CORS, and registers all routers."""
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from .database import Base, engine

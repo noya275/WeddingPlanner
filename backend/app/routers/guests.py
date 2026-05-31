@@ -25,6 +25,7 @@ def list_guests(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
+    """Return all guests for the event, ordered by insertion id; requires auth and event ownership."""
     get_event_or_404(event_id, current_user.id, db)
     return db.query(Guest).filter(Guest.event_id == event_id).order_by(Guest.id).all()
 
@@ -36,6 +37,7 @@ def create_guest(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
+    """Create a new guest and auto-assign a unique RSVP token; requires auth and event ownership."""
     get_event_or_404(event_id, current_user.id, db)
     guest = Guest(**data.model_dump(), event_id=event_id, rsvp_token=secrets.token_urlsafe(16))
     db.add(guest)
@@ -51,6 +53,7 @@ def get_guest(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
+    """Return a single guest by id, scoped to the authenticated user's event."""
     get_event_or_404(event_id, current_user.id, db)
     return get_guest_or_404(guest_id, event_id, db)
 
@@ -63,6 +66,7 @@ def update_guest(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
+    """Partially update a guest (e.g. RSVP status, phone, table); only provided fields are changed."""
     get_event_or_404(event_id, current_user.id, db)
     guest = get_guest_or_404(guest_id, event_id, db)
     for field, value in data.model_dump(exclude_unset=True).items():
@@ -96,6 +100,7 @@ def delete_guest(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
+    """Permanently remove a guest from the event; returns 204 No Content on success."""
     get_event_or_404(event_id, current_user.id, db)
     guest = get_guest_or_404(guest_id, event_id, db)
     db.delete(guest)

@@ -1,3 +1,4 @@
+/** Shared TypeScript types that mirror the backend Pydantic schemas returned by the REST API. */
 export type RSVPStatus = 'pending' | 'confirmed' | 'declined' | 'maybe'
 export type TaskStatus = 'todo' | 'in_progress' | 'done'
 

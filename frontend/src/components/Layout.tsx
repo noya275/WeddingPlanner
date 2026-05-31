@@ -1,6 +1,7 @@
 import { Link, Outlet, useNavigate, useLocation } from 'react-router-dom'
 import { clearToken } from '../api/client'
 
+/** Top-level authenticated shell: renders the global nav bar with a logout button and an Outlet for nested routes. */
 export default function Layout() {
   const navigate = useNavigate()
   const location = useLocation()

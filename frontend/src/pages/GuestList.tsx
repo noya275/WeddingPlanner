@@ -22,6 +22,7 @@ function withPrefix(phone: string) {
 
 type GuestPatch = { id: number; name?: string; phone?: string | null; plus_one?: boolean; rsvp_status?: RSVPStatus; rsvp_sent?: boolean; side?: 'bride' | 'groom' | null }
 
+/** Inline input row at the bottom of a guest table for quickly adding a guest by name and phone. */
 function AddRow({ onAdd }: { onAdd: (name: string, phone: string) => void }) {
   const [name, setName] = useState('')
   const [phone, setPhone] = useState('')
@@ -172,6 +173,7 @@ function SideTable({ title, emoji, guests, onUpdate, onDelete, onSendRSVP, onAdd
   )
 }
 
+/** Guest list page: split by bride/groom side with RSVP status, +1, and WhatsApp invite actions. */
 export default function GuestList() {
   const { eventId } = useParams<{ eventId: string }>()
   const queryClient = useQueryClient()

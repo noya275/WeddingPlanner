@@ -12,6 +12,7 @@ const COLUMNS: { status: TaskStatus; label: string; dot: string }[] = [
 
 const STATUS_ORDER: TaskStatus[] = ['todo', 'in_progress', 'done']
 
+/** Input at the bottom of a kanban column that creates a task on Enter or blur. */
 function AddTaskRow({ onAdd }: { onAdd: (title: string) => void }) {
   const [value, setValue] = useState('')
 
@@ -37,6 +38,7 @@ function AddTaskRow({ onAdd }: { onAdd: (title: string) => void }) {
   )
 }
 
+/** Kanban-style task board with three columns (To Do / In Progress / Done) and arrow-key movement. */
 export default function Tasks() {
   const { eventId } = useParams<{ eventId: string }>()
   const queryClient = useQueryClient()

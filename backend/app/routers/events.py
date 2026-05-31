@@ -82,6 +82,7 @@ def get_event(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
+    """Return a single event by id, scoped to the authenticated user."""
     return get_event_or_404(event_id, current_user.id, db)
 
 

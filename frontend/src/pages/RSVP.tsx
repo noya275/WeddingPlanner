@@ -24,6 +24,7 @@ const THANK_YOU: Record<RSVPChoice, { emoji: string; title: string; body: (name:
   },
 }
 
+/** Public RSVP page reached via a unique token link; lets a guest confirm, decline, or mark maybe without logging in. */
 export default function RSVPPage() {
   const { token } = useParams<{ token: string }>()
   const [submittedStatus, setSubmittedStatus] = useState<RSVPChoice | null>(null)

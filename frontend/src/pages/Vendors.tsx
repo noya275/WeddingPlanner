@@ -54,6 +54,7 @@ const CATEGORIES = [
 
 const KNOWN_CATEGORIES = new Set(CATEGORIES.map((c) => c.name))
 
+/** Inline input row at the bottom of a vendor category section for quickly adding a new vendor. */
 function AddRow({ onAdd, category }: { onAdd: (name: string, category: string) => void; category: string }) {
   const [name, setName] = useState('')
   const nameRef = useRef<HTMLInputElement>(null)
@@ -87,6 +88,7 @@ function AddRow({ onAdd, category }: { onAdd: (name: string, category: string) =
   )
 }
 
+/** DnD-Kit wrapper that makes a vendor table row draggable within its category group. */
 function SortableRow({ vendor, children }: { vendor: Vendor; children: React.ReactNode }) {
   const { attributes, listeners, setNodeRef, transform, isDragging } = useSortable({ id: vendor.id })
 
@@ -113,6 +115,7 @@ function SortableRow({ vendor, children }: { vendor: Vendor; children: React.Rea
   )
 }
 
+/** Vendor & budget page: grouped drag-and-drop table with per-vendor cost tracking and a budget overview. */
 export default function Vendors() {
   const { eventId } = useParams<{ eventId: string }>()
   const queryClient = useQueryClient()

@@ -25,6 +25,7 @@ def list_vendors(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
+    """Return all vendors for the event ordered by sort_order; requires auth and event ownership."""
     get_event_or_404(event_id, current_user.id, db)
     return db.query(Vendor).filter(Vendor.event_id == event_id).order_by(Vendor.sort_order).all()
 
@@ -36,6 +37,7 @@ def create_vendor(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
+    """Create a vendor; auto-assigns sort_order after the current last vendor if none is provided."""
     get_event_or_404(event_id, current_user.id, db)
     payload = data.model_dump()
     if payload.get('sort_order') == 0:
@@ -55,6 +57,7 @@ def get_vendor(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
+    """Return a single vendor by id, scoped to the authenticated user's event."""
     get_event_or_404(event_id, current_user.id, db)
     return get_vendor_or_404(vendor_id, event_id, db)
 
@@ -67,6 +70,7 @@ def update_vendor(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
+    """Partially update vendor fields (e.g. contact, actual cost, paid status, sort order)."""
     get_event_or_404(event_id, current_user.id, db)
     vendor = get_vendor_or_404(vendor_id, event_id, db)
     for field, value in data.model_dump(exclude_unset=True).items():
@@ -83,6 +87,7 @@ def delete_vendor(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
+    """Permanently delete a vendor; returns 204 No Content on success."""
     get_event_or_404(event_id, current_user.id, db)
     vendor = get_vendor_or_404(vendor_id, event_id, db)
     db.delete(vendor)

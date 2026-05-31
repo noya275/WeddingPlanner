@@ -3,6 +3,7 @@ import { useNavigate, Link } from 'react-router-dom'
 import { useMutation } from '@tanstack/react-query'
 import api from '../api/client'
 
+/** Login page: authenticates via OAuth2 password flow and stores the JWT in localStorage or sessionStorage based on "Remember me". */
 export default function Login() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')

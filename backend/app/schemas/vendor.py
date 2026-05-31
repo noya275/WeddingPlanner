@@ -5,6 +5,7 @@ from decimal import Decimal
 
 
 class VendorCreate(BaseModel):
+    """Fields accepted when adding a new vendor; sort_order of 0 triggers auto-assignment."""
     name: str
     vendor_name: Optional[str] = None
     category: Optional[str] = None
@@ -19,6 +20,7 @@ class VendorCreate(BaseModel):
 
 
 class VendorUpdate(BaseModel):
+    """All fields optional so clients can PATCH a single vendor field at a time."""
     name: Optional[str] = None
     vendor_name: Optional[str] = None
     category: Optional[str] = None

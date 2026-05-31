@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import axios from 'axios'
 import api, { clearToken } from '../api/client'
 
+/** Registration page: clears any existing session on mount, then POSTs new credentials and redirects to login. */
 export default function Register() {
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')

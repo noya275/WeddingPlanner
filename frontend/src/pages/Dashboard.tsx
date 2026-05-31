@@ -8,6 +8,7 @@ interface EventFormValues {
   title: string
 }
 
+/** Controlled form used for both creating a new event and editing an existing one's title. */
 function EventForm({
   initialValues,
   onSubmit,
@@ -56,6 +57,7 @@ function EventForm({
   )
 }
 
+/** Main landing page: lists all events with optimistic create, rename, and delete actions. */
 export default function Dashboard() {
   const queryClient = useQueryClient()
   const [showForm, setShowForm] = useState(false)

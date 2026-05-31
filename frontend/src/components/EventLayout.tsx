@@ -10,6 +10,7 @@ const NAV_ITEMS = [
   { label: 'Seating', path: 'seating', icon: '🪑', gray: false },
 ]
 
+/** Persistent sidebar layout for a single event: shows the event title and navigation tabs (Guests, Tasks, Vendors, Seating). */
 export default function EventLayout() {
   const { eventId } = useParams<{ eventId: string }>()
 

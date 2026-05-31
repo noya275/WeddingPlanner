@@ -153,6 +153,7 @@ function UnassignedZone({ guests }: { guests: Guest[] }) {
   )
 }
 
+/** Interactive drag-and-drop seating chart: assign guests to numbered round tables and mark tables as done. */
 export default function SeatingChart() {
   const { eventId } = useParams<{ eventId: string }>()
   const queryClient = useQueryClient()

@@ -13,6 +13,7 @@ from decimal import Decimal
 
 
 class EventCreate(BaseModel):
+    """Fields required to create a new wedding event."""
     title: str
     date: Optional[DateType] = None
     venue: Optional[str] = None
@@ -30,6 +31,7 @@ class EventUpdate(BaseModel):
 
 
 class EventOut(BaseModel):
+    """Full event representation returned by the API, including server-set id and created_at."""
     id: int
     title: str
     date: Optional[DateType]
