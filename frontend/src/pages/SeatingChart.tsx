@@ -157,13 +157,13 @@ function UnassignedZone({ guests }: { guests: Guest[] }) {
 export default function SeatingChart() {
   const { eventId } = useParams<{ eventId: string }>()
   const queryClient = useQueryClient()
-  const [tableCount, setTableCount] = useState(8)
-  const [capacity, setCapacity] = useState(10)
+  const storageKey = `seating-${eventId}`
+  const [tableCount, setTableCount] = useState(() => Number(localStorage.getItem(`${storageKey}-tableCount`)) || 8)
+  const [capacity, setCapacity] = useState(() => Number(localStorage.getItem(`${storageKey}-capacity`)) || 10)
   const [activeGuest, setActiveGuest] = useState<Guest | null>(null)
-  const storageKey = `doneTables-${eventId}`
   const [doneTables, setDoneTables] = useState<Set<number>>(() => {
     try {
-      const saved = localStorage.getItem(storageKey)
+      const saved = localStorage.getItem(`${storageKey}-doneTables`)
       return saved ? new Set<number>(JSON.parse(saved)) : new Set<number>()
     } catch { return new Set<number>() }
   })
@@ -172,7 +172,7 @@ export default function SeatingChart() {
     setDoneTables((prev) => {
       const next = new Set(prev)
       if (next.has(n)) next.delete(n); else next.add(n)
-      localStorage.setItem(storageKey, JSON.stringify([...next]))
+      localStorage.setItem(`${storageKey}-doneTables`, JSON.stringify([...next]))
       return next
     })
   }
@@ -237,7 +237,7 @@ export default function SeatingChart() {
           <label className="flex items-center gap-2 text-gray-600 font-semibold">
             Tables:
             <input type="number" min={1} max={30} value={tableCount}
-              onChange={(e) => setTableCount(Math.max(1, parseInt(e.target.value) || 1))}
+              onChange={(e) => { const v = Math.max(1, parseInt(e.target.value) || 1); setTableCount(v); localStorage.setItem(`${storageKey}-tableCount`, String(v)) }}
               name="table-count"
               autoComplete="off"
               className="w-14 border border-[#d4b896] rounded-lg px-2 py-1 text-center bg-white/60 focus:outline-none focus:ring-2 focus:ring-burgundy-400" />
@@ -245,7 +245,7 @@ export default function SeatingChart() {
           <label className="flex items-center gap-2 text-gray-600 font-semibold">
             Seats/table:
             <input type="number" min={1} max={30} value={capacity}
-              onChange={(e) => setCapacity(Math.max(1, parseInt(e.target.value) || 1))}
+              onChange={(e) => { const v = Math.max(1, parseInt(e.target.value) || 1); setCapacity(v); localStorage.setItem(`${storageKey}-capacity`, String(v)) }}
               name="table-capacity"
               autoComplete="off"
               className="w-14 border border-[#d4b896] rounded-lg px-2 py-1 text-center bg-white/60 focus:outline-none focus:ring-2 focus:ring-burgundy-400" />
