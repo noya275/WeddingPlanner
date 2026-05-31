@@ -86,7 +86,7 @@ export default function RSVPPage() {
           )}
 
           <div className="border-t border-gray-100 pt-6">
-            <p className="text-gray-500 text-sm mb-6">האם תוכלו להגיע?</p>
+            <p className="text-gray-500 text-base mb-6">האם תוכלו להגיע?</p>
 
             <div className="flex flex-col gap-3">
               <button
