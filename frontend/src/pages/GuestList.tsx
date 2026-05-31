@@ -2,7 +2,7 @@ import { useState, useRef } from 'react'
 import { useParams } from 'react-router-dom'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import api from '../api/client'
-import type { Guest, RSVPStatus } from '../api/types'
+import type { Guest, Event, RSVPStatus } from '../api/types'
 import EditableCell from '../components/EditableCell'
 
 const STATUS_COLORS: Record<RSVPStatus, string> = {
@@ -179,6 +179,12 @@ export default function GuestList() {
   const queryClient = useQueryClient()
   const [search, setSearch] = useState('')
 
+  const { data: event } = useQuery<Event>({
+    queryKey: ['event', eventId],
+    queryFn: () => api.get(`/events/${eventId}`).then((r) => r.data),
+    staleTime: 30_000,
+  })
+
   const { data: guests = [], isLoading } = useQuery<Guest[]>({
     queryKey: ['guests', eventId],
     queryFn: () => api.get(`/events/${eventId}/guests`).then((r) => r.data),
@@ -254,7 +260,8 @@ export default function GuestList() {
   function buildWhatsAppUrl(guest: Guest) {
     if (!guest.rsvp_token || !guest.phone) return null
     const rsvpUrl = `${window.location.origin}/rsvp/${guest.rsvp_token}`
-    const msg = `Hi ${guest.name}! You're invited to our wedding 💍\nPlease let us know if you'll be joining us:\n${rsvpUrl}`
+    const eventTitle = event?.title ?? 'האירוע'
+    const msg = `הנכם מוזמנים ל${eventTitle} 💍\nנשמח לדעת האם תוכלו להגיע:\n${rsvpUrl}`
     return `whatsapp://send?phone=${guest.phone.replace(/\D/g, '')}&text=${encodeURIComponent(msg)}`
   }
 
