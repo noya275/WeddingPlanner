@@ -96,6 +96,9 @@ export default function Dashboard() {
         title: values.title,
         date: values.date || null,
         budget_total: null,
+        table_count: 8,
+        table_capacity: 10,
+        done_tables: [],
         created_at: new Date().toISOString(),
       }
       queryClient.setQueryData(['events'], (old: Event[] = []) => [...old, tempEvent])

@@ -14,6 +14,9 @@ export interface Event {
   title: string
   date: string | null
   budget_total: number | null
+  table_count: number
+  table_capacity: number
+  done_tables: number[]
   created_at: string
 }
 

@@ -24,6 +24,9 @@ class EventUpdate(BaseModel):
     title: Optional[str] = None
     date: Optional[DateType] = None
     budget_total: Optional[Decimal] = None
+    table_count: Optional[int] = None
+    table_capacity: Optional[int] = None
+    done_tables: Optional[list[int]] = None
 
 
 class EventOut(BaseModel):
@@ -32,6 +35,9 @@ class EventOut(BaseModel):
     title: str
     date: Optional[DateType]
     budget_total: Optional[Decimal]
+    table_count: int = 8
+    table_capacity: int = 10
+    done_tables: list[int] = []
     created_at: datetime
 
     # from_attributes=True lets Pydantic read from SQLAlchemy ORM objects, not just dicts.

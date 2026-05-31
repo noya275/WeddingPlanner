@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Date, ForeignKey, DateTime, Numeric
+from sqlalchemy import Column, Integer, String, Date, ForeignKey, DateTime, Numeric, JSON
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 from ..database import Base
@@ -13,6 +13,9 @@ class Event(Base):
     title = Column(String, nullable=False)
     date = Column(Date)
     budget_total = Column(Numeric(12, 2))
+    table_count = Column(Integer, default=8)
+    table_capacity = Column(Integer, default=10)
+    done_tables = Column(JSON, default=list)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
 
     owner = relationship("User", back_populates="events")

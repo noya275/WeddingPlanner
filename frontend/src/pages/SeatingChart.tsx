@@ -8,7 +8,7 @@ import {
 import { snapCenterToCursor } from '@dnd-kit/modifiers'
 import type { DragEndEvent, DragStartEvent } from '@dnd-kit/core'
 import api from '../api/client'
-import type { Guest } from '../api/types'
+import type { Guest, Event } from '../api/types'
 
 const TABLE_SIZE = 200
 const CONTAINER = 380
@@ -157,32 +157,36 @@ function UnassignedZone({ guests }: { guests: Guest[] }) {
 export default function SeatingChart() {
   const { eventId } = useParams<{ eventId: string }>()
   const queryClient = useQueryClient()
-  const storageKey = `seating-${eventId}`
-  const [tableCount, setTableCount] = useState(() => Number(localStorage.getItem(`${storageKey}-tableCount`)) || 8)
-  const [capacity, setCapacity] = useState(() => Number(localStorage.getItem(`${storageKey}-capacity`)) || 10)
   const [activeGuest, setActiveGuest] = useState<Guest | null>(null)
-  const [doneTables, setDoneTables] = useState<Set<number>>(() => {
-    try {
-      const saved = localStorage.getItem(`${storageKey}-doneTables`)
-      return saved ? new Set<number>(JSON.parse(saved)) : new Set<number>()
-    } catch { return new Set<number>() }
-  })
-
-  function toggleDone(n: number) {
-    setDoneTables((prev) => {
-      const next = new Set(prev)
-      if (next.has(n)) next.delete(n); else next.add(n)
-      localStorage.setItem(`${storageKey}-doneTables`, JSON.stringify([...next]))
-      return next
-    })
-  }
 
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 5 } }))
+
+  const { data: event } = useQuery<Event>({
+    queryKey: ['event', eventId],
+    queryFn: () => api.get(`/events/${eventId}`).then((r) => r.data),
+    staleTime: 30_000,
+  })
+
+  const tableCount = event?.table_count ?? 8
+  const capacity = event?.table_capacity ?? 10
+  const doneTables = new Set<number>(event?.done_tables ?? [])
+
+  function toggleDone(n: number) {
+    const next = new Set(doneTables)
+    if (next.has(n)) next.delete(n); else next.add(n)
+    updateEvent.mutate({ done_tables: [...next] })
+  }
 
   const { data: guests = [] } = useQuery<Guest[]>({
     queryKey: ['guests', eventId],
     queryFn: () => api.get(`/events/${eventId}/guests`).then((r) => r.data),
     refetchInterval: 5000,
+  })
+
+  const updateEvent = useMutation({
+    mutationFn: (data: { table_count?: number; table_capacity?: number; done_tables?: number[] }) =>
+      api.patch(`/events/${eventId}`, data).then((r) => r.data),
+    onSuccess: (updated) => queryClient.setQueryData(['event', eventId], updated),
   })
 
   const updateGuest = useMutation({
@@ -237,7 +241,7 @@ export default function SeatingChart() {
           <label className="flex items-center gap-2 text-gray-600 font-semibold">
             Tables:
             <input type="number" min={1} max={30} value={tableCount}
-              onChange={(e) => { const v = Math.max(1, parseInt(e.target.value) || 1); setTableCount(v); localStorage.setItem(`${storageKey}-tableCount`, String(v)) }}
+              onChange={(e) => { const v = Math.max(1, parseInt(e.target.value) || 1); updateEvent.mutate({ table_count: v }) }}
               name="table-count"
               autoComplete="off"
               className="w-14 border border-[#d4b896] rounded-lg px-2 py-1 text-center bg-white/60 focus:outline-none focus:ring-2 focus:ring-burgundy-400" />
@@ -245,7 +249,7 @@ export default function SeatingChart() {
           <label className="flex items-center gap-2 text-gray-600 font-semibold">
             Seats/table:
             <input type="number" min={1} max={30} value={capacity}
-              onChange={(e) => { const v = Math.max(1, parseInt(e.target.value) || 1); setCapacity(v); localStorage.setItem(`${storageKey}-capacity`, String(v)) }}
+              onChange={(e) => { const v = Math.max(1, parseInt(e.target.value) || 1); updateEvent.mutate({ table_capacity: v }) }}
               name="table-capacity"
               autoComplete="off"
               className="w-14 border border-[#d4b896] rounded-lg px-2 py-1 text-center bg-white/60 focus:outline-none focus:ring-2 focus:ring-burgundy-400" />
