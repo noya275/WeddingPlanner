@@ -186,7 +186,16 @@ export default function SeatingChart() {
   const updateEvent = useMutation({
     mutationFn: (data: { table_count?: number; table_capacity?: number; done_tables?: number[] }) =>
       api.patch(`/events/${eventId}`, data).then((r) => r.data),
-    onSuccess: (updated) => queryClient.setQueryData(['event', eventId], updated),
+    onMutate: async (data) => {
+      await queryClient.cancelQueries({ queryKey: ['event', eventId] })
+      const previous = queryClient.getQueryData<Event>(['event', eventId])
+      queryClient.setQueryData(['event', eventId], (old: Event) => ({ ...old, ...data }))
+      return { previous }
+    },
+    onError: (_, __, context) => {
+      if (context?.previous) queryClient.setQueryData(['event', eventId], context.previous)
+    },
+    onSettled: () => queryClient.invalidateQueries({ queryKey: ['event', eventId] }),
   })
 
   const updateGuest = useMutation({
