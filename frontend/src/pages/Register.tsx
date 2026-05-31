@@ -1,14 +1,16 @@
 import { useNavigate, Link } from 'react-router-dom'
 import { useMutation } from '@tanstack/react-query'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import axios from 'axios'
-import api from '../api/client'
+import api, { clearToken } from '../api/client'
 
 export default function Register() {
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const navigate = useNavigate()
+
+  useEffect(() => { clearToken() }, [])
 
   const register = useMutation({
     mutationFn: () => api.post('/auth/register', { name, email, password }),
