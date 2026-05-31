@@ -139,6 +139,7 @@ const { data: tasks = [], isLoading } = useQuery<Task[]>({
                           defaultValue={task.title}
                           onBlur={(e) => { const v = e.target.value.trim(); if (v && v !== task.title) updateTask.mutate({ id: task.id, title: v }) }}
                           rows={3}
+                          autoComplete="off"
                           className="flex-1 resize-none bg-transparent outline-none font-medium text-gray-900 placeholder-gray-300 w-full"
                         />
                         <button
