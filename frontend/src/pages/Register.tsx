@@ -11,18 +11,8 @@ export default function Register() {
   const navigate = useNavigate()
 
   const register = useMutation({
-    mutationFn: async () => {
-      await api.post('/auth/register', { name, email, password })
-      const form = new URLSearchParams()
-      form.append('username', email)
-      form.append('password', password)
-      const { data } = await api.post('/auth/login', form)
-      return data
-    },
-    onSuccess: (data) => {
-      localStorage.setItem('token', data.access_token)
-      navigate('/')
-    },
+    mutationFn: () => api.post('/auth/register', { name, email, password }),
+    onSuccess: () => navigate('/login'),
   })
 
   const errorMessage = register.error
