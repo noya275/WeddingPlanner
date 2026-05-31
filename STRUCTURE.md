@@ -53,9 +53,6 @@ Models define the shape of the database. Each model is a Python class that maps 
 ### Schemas (`app/schemas/`)
 
 Schemas are separate from models. While models define how data is stored in the database, schemas define the shape of data going into and out of the API as JSON. They are written using **Pydantic** — a Python library that validates data automatically. FastAPI integrates with Pydantic so that when a request arrives, the body is validated against the schema before your code even runs. If a required field is missing or has the wrong type, FastAPI returns a 422 error automatically.
-
-The key reason models and schemas are separate is that **what you store and what you expose aren't always the same**. For example: the `users` table stores a `password_hash` column — but `UserOut` (the response schema) deliberately doesn't include it, so the hash is never sent to the frontend. Similarly, `EventCreate` only requires a `title` — fields like `id`, `created_at`, and `user_id` are assigned by the server and don't need to come from the user.
-
 Each resource follows the same three-schema pattern: `XCreate` (what the frontend sends to create), `XUpdate` (what the frontend sends to edit — all fields optional), `XOut` (what the API returns).
 
 | File | Purpose |

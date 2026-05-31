@@ -13,8 +13,6 @@ export interface Event {
   id: number
   title: string
   date: string | null
-  venue: string | null
-  description: string | null
   budget_total: number | null
   created_at: string
 }

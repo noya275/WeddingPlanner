@@ -12,8 +12,6 @@ class Event(Base):
     user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
     title = Column(String, nullable=False)
     date = Column(Date)
-    venue = Column(String)
-    description = Column(String)
     budget_total = Column(Numeric(12, 2))
     created_at = Column(DateTime(timezone=True), server_default=func.now())
 

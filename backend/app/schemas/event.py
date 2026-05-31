@@ -16,8 +16,6 @@ class EventCreate(BaseModel):
     """Fields required to create a new wedding event."""
     title: str
     date: Optional[DateType] = None
-    venue: Optional[str] = None
-    description: Optional[str] = None
     budget_total: Optional[Decimal] = None
 
 
@@ -25,8 +23,6 @@ class EventUpdate(BaseModel):
     """All fields optional so clients can PATCH a single field at a time."""
     title: Optional[str] = None
     date: Optional[DateType] = None
-    venue: Optional[str] = None
-    description: Optional[str] = None
     budget_total: Optional[Decimal] = None
 
 
@@ -35,8 +31,6 @@ class EventOut(BaseModel):
     id: int
     title: str
     date: Optional[DateType]
-    venue: Optional[str]
-    description: Optional[str]
     budget_total: Optional[Decimal]
     created_at: datetime
 
