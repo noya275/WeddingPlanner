@@ -6,21 +6,21 @@ import type { RSVPInfo } from '../api/types'
 
 type RSVPChoice = 'confirmed' | 'declined' | 'maybe'
 
-const THANK_YOU: Record<RSVPChoice, { emoji: string; title: string; body: (name: string, eventTitle: string) => string }> = {
+const THANK_YOU: Record<RSVPChoice, { emoji: string; title: string; body: (eventTitle: string) => string }> = {
   confirmed: {
     emoji: '🎉',
-    title: "We'll see you there!",
-    body: (name, eventTitle) => `Thanks ${name}! Your attendance at ${eventTitle} has been confirmed.`,
+    title: 'תודה! נתראה שם',
+    body: (eventTitle) => `אישרתם הגעה ל${eventTitle}. נשמח לראותכם!`,
   },
   declined: {
     emoji: '💌',
-    title: "We understand, thanks!",
-    body: (name) => `Thanks for letting us know, ${name}. You'll be missed!`,
+    title: 'תודה על העדכון',
+    body: () => 'חבל שלא תוכלו להגיע. נשמח לחגוג איתכם בהזדמנות אחרת!',
   },
   maybe: {
     emoji: '🤔',
-    title: "No worries, we'll keep you posted!",
-    body: (name, eventTitle) => `Thanks ${name}! We hope you'll be able to make it to ${eventTitle}.`,
+    title: 'תודה! נעדכן אתכם',
+    body: (eventTitle) => `נקווה שתוכלו להגיע ל${eventTitle}. נשמח לשמוע בהקדם.`,
   },
 }
 
@@ -63,10 +63,10 @@ export default function RSVPPage() {
     const { emoji, title, body } = THANK_YOU[submittedStatus]
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <div className="max-w-sm w-full mx-4 text-center">
+        <div className="max-w-sm w-full mx-4 text-center" dir="rtl">
           <div className="text-5xl mb-4">{emoji}</div>
           <h1 className="text-2xl font-bold text-gray-900 mb-2">{title}</h1>
-          <p className="text-gray-500">{body(data.name, data.event_title)}</p>
+          <p className="text-gray-500">{body(data.event_title)}</p>
         </div>
       </div>
     )
@@ -75,24 +75,21 @@ export default function RSVPPage() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
       <div className="max-w-sm w-full">
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-8 text-center">
-          <p className="text-sm text-burgundy-700 font-medium uppercase tracking-widest mb-2">
-            You're invited
+        <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-8 text-center" dir="rtl">
+          <p className="text-sm text-burgundy-700 font-medium tracking-widest mb-2">
+            הנכם מוזמנים
           </p>
           <h1 className="text-2xl font-bold text-gray-900 mb-1">{data.event_title}</h1>
           {data.event_date && (
             <p className="text-gray-400 text-sm mb-6">
-              {new Date(data.event_date).toLocaleDateString(undefined, {
+              {new Date(data.event_date + 'T00:00:00').toLocaleDateString('he-IL', {
                 weekday: 'long', year: 'numeric', month: 'long', day: 'numeric',
               })}
             </p>
           )}
 
           <div className="border-t border-gray-100 pt-6">
-            <p className="text-gray-600 mb-1 text-sm">
-              Hi <span className="font-semibold text-gray-900">{data.name}</span>,
-            </p>
-            <p className="text-gray-500 text-sm mb-6">Will you be joining us?</p>
+            <p className="text-gray-500 text-sm mb-6">האם תוכלו להגיע?</p>
 
             <div className="flex flex-col gap-3">
               <button
@@ -100,21 +97,21 @@ export default function RSVPPage() {
                 disabled={submit.isPending}
                 className="w-full bg-burgundy-700 text-white py-3 rounded-xl font-semibold text-sm hover:bg-burgundy-800 transition-colors disabled:opacity-50"
               >
-                ✓ Yes, I'll be there!
+                ✓ כן, נשמח להגיע!
               </button>
               <button
                 onClick={() => submit.mutate('maybe')}
                 disabled={submit.isPending}
                 className="w-full bg-orange-50 text-orange-600 border border-orange-200 py-3 rounded-xl font-semibold text-sm hover:bg-orange-100 transition-colors disabled:opacity-50"
               >
-                🤔 Not sure yet
+                🤔 עדיין לא בטוחים
               </button>
               <button
                 onClick={() => submit.mutate('declined')}
                 disabled={submit.isPending}
                 className="w-full bg-gray-100 text-gray-600 py-3 rounded-xl font-semibold text-sm hover:bg-gray-200 transition-colors disabled:opacity-50"
               >
-                ✕ Sorry, I can't make it
+                ✕ לצערנו לא נוכל להגיע
               </button>
             </div>
           </div>
