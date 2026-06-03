@@ -4,6 +4,7 @@ A full-stack wedding planning app for managing every aspect of your wedding in o
 
 ## Features
 
+- **Authentication** — user registration and login with secure session management
 - **Guest list** — add guests, track RSVPs, and manage +1s
 - **Seating chart** — assign guests to tables with a drag-and-drop builder
 - **Tasks** — to-do list for tracking everything that needs to get done
