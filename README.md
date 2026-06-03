@@ -1,6 +1,14 @@
 # Wedding Planner
 
-A full-stack wedding planning app for managing guests, vendors, tasks, and seating.
+A full-stack wedding planning app for managing every aspect of your wedding in one place.
+
+## Features
+
+- **Guest list** — add guests, track RSVPs, and manage +1s
+- **Seating chart** — assign guests to tables with a drag-and-drop builder
+- **Tasks** — to-do list for tracking everything that needs to get done
+- **Vendors** — keep vendor contacts, contracts, and notes organized
+- **Budget** — track expenses and stay on top of your budget
 
 ## Tech Stack
 
