@@ -4,6 +4,8 @@ description: Run the Wedding Planner test suites (backend and/or frontend)
 
 # Run tests
 
+If the user specifies `backend`, run only the backend. If they specify `frontend`, run only the frontend. Otherwise run both.
+
 ## Backend (pytest)
 
 ```bash
