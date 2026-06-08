@@ -1,3 +1,23 @@
+"""
+Shared pytest fixtures for all backend tests.
+
+This file is named conftest.py because that is the filename pytest requires —
+it cannot be renamed. Fixtures defined here are automatically available to every
+test file in this directory without needing to import them.
+
+Database strategy:
+  Uses an in-memory SQLite database (sqlite:///:memory:) so no file is written to disk.
+  StaticPool ensures all connections share the same in-memory instance — without it,
+  each connection would get its own empty database and the tables would not be visible
+  across the app and the test session.
+  The fresh_db fixture (autouse=True) creates all tables before each test and drops
+  them after, so every test starts with a clean slate.
+
+Available fixtures:
+  client      — unauthenticated TestClient wired to the test database
+  auth_client — same client, pre-registered and logged in (Bearer token attached)
+  event_id    — creates an event under the auth user and returns its id
+"""
 import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy import create_engine
