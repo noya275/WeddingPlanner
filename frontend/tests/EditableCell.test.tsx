@@ -3,9 +3,9 @@
  * vendor table, and task list. Covers display, click-to-edit, save triggers (blur/Enter),
  * cancel (Escape), and the null-on-clear behaviour.
  */
-import { screen, fireEvent } from '@testing-library/react'
+import { vi } from 'vitest'
+import { screen, fireEvent, render } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { render } from '@testing-library/react'
 import EditableCell from '../src/components/EditableCell'
 
 function setup(value: string, onSave = vi.fn()) {
