@@ -22,3 +22,6 @@ dist/
 
 # Docker
 *.log
+
+# Local only
+STRUCTURE.md
