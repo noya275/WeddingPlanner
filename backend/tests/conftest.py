@@ -1,9 +1,6 @@
 """
 Shared pytest fixtures for all backend tests.
-
-This file is named conftest.py because that is the filename pytest requires —
-it cannot be renamed. Fixtures defined here are automatically available to every
-test file in this directory without needing to import them.
+Fixtures defined here are automatically available to every test file in this directory.
 
 Database strategy:
   Uses an in-memory SQLite database (sqlite:///:memory:) so no file is written to disk.
