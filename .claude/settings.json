@@ -6,5 +6,18 @@
       "Bash(git *)",
       "Bash(gh *)"
     ]
+  },
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "file=\"$CLAUDE_TOOL_INPUT_FILE_PATH\"; case \"$file\" in *.py) cd \"/Users/noya/Downloads/Personal/Personal Projects/WeddingPlanner/backend\" && source venv/bin/activate && black \"$file\" 2>/dev/null && ruff check --fix \"$file\" 2>/dev/null ;; *.ts|*.tsx|*.js|*.jsx|*.json|*.css) cd \"/Users/noya/Downloads/Personal/Personal Projects/WeddingPlanner/frontend\" && npx prettier --write \"$file\" 2>/dev/null ;; esac"
+          }
+        ]
+      }
+    ]
   }
 }
