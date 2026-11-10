@@ -4,7 +4,7 @@ from sqlalchemy.orm import declarative_base, sessionmaker
 from .core.config import settings
 
 # SQLite requires this flag because FastAPI serves concurrent requests across threads.
-_kwargs = {"check_same_thread": False} if settings.DATABASE_URL.startswith("sqlite") else {}
+_kwargs = {"check_same_thread": False} if settings.DATABASE_URL.startswith("sqlite") else {"prepare_threshold": None}
 engine = create_engine(settings.DATABASE_URL, connect_args=_kwargs)
 
 # Factory that produces Sessions; autocommit/autoflush off so we control transaction boundaries.
